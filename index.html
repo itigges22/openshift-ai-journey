@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Red Hat OpenShift AI | Connecting Models to Data</title>
-    <link rel="stylesheet" href="styles.css?v=23" />
+    <link rel="stylesheet" href="styles.css?v=24" />
   </head>
   <body>
     <section id="landingScreen" class="screen landing-screen" aria-labelledby="landing-title">
@@ -40,6 +40,11 @@
             <svg id="graphEdges" class="graph-edges" role="presentation" aria-hidden="true"></svg>
             <div id="graphNodes" class="graph-nodes"></div>
           </div>
+          <div class="zoom-controls" role="group" aria-label="Zoom controls">
+            <button id="zoomIn" class="zoom-btn" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+            <button id="zoomOut" class="zoom-btn" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+            <button id="zoomReset" class="zoom-btn zoom-reset" type="button" aria-label="Reset view" title="Fit to view">⤢</button>
+          </div>
         </div>
       </main>
 
@@ -62,6 +67,6 @@
     </section>
 
     <script src="assets/vendor/dagre.min.js"></script>
-    <script src="app.js?v=23"></script>
+    <script src="app.js?v=24"></script>
   </body>
 </html>

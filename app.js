@@ -728,6 +728,23 @@ function initPanZoom() {
     fitView();
   });
   window.addEventListener('resize', () => { clampPan(); applyView(); });
+
+  // Corner zoom buttons (mouse drag is reserved for panning). Zoom about the
+  // viewport centre with a smooth transition.
+  const zoomBtns = document.querySelector('.zoom-controls');
+  if (zoomBtns) zoomBtns.addEventListener('pointerdown', ev => ev.stopPropagation());
+  const zoomStep = factor => {
+    const { w, h } = viewportSize();
+    graphCanvas.style.transition = 'transform .2s ease';
+    zoomAt(factor, w / 2, h / 2);
+    setTimeout(() => { graphCanvas.style.transition = ''; }, 220);
+  };
+  const zoomInBtn = document.querySelector('#zoomIn');
+  const zoomOutBtn = document.querySelector('#zoomOut');
+  const zoomResetBtn = document.querySelector('#zoomReset');
+  if (zoomInBtn) zoomInBtn.addEventListener('click', () => zoomStep(1.25));
+  if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => zoomStep(1 / 1.25));
+  if (zoomResetBtn) zoomResetBtn.addEventListener('click', () => { graphCanvas.style.transition = 'transform .25s ease'; fitView(); setTimeout(() => { graphCanvas.style.transition = ''; }, 260); });
 }
 
 function renderDetail() {

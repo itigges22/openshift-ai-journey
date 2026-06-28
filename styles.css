@@ -129,6 +129,38 @@ button:focus-visible { outline: 4px solid #73bcf7; outline-offset: 4px; }
   background-size: cover, 46px 46px, 46px 46px;
 }
 .graph-viewport.dragging { cursor: grabbing; }
+/* Corner zoom controls — mouse drag stays for panning */
+.zoom-controls {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 6;
+}
+.zoom-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #2b2f36;
+  background: #fff;
+  border: 1px solid #d9dce1;
+  border-radius: 9px;
+  box-shadow: 0 2px 8px rgba(21, 21, 21, .12);
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, transform .08s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.zoom-btn:hover { background: #f6f7f9; border-color: var(--rh-red); color: var(--rh-red); }
+.zoom-btn:active { transform: translateY(1px); }
+.zoom-btn.zoom-reset { font-size: 1rem; color: #5b6068; }
 .graph-canvas {
   position: absolute;
   top: 0;
