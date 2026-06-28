@@ -1,0 +1,9 @@
+# dependencies (installed for local testing only)
+node_modules/
+
+# test/screenshot artifacts
+artifacts-*.png
+
+# OS / misc
+.DS_Store
+*.log

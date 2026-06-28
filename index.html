@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Red Hat OpenShift AI | Connecting Models to Data</title>
+    <link rel="stylesheet" href="styles.css?v=23" />
+  </head>
+  <body>
+    <section id="landingScreen" class="screen landing-screen" aria-labelledby="landing-title">
+      <header class="topbar topbar-dark">
+        <img class="rh-logo" src="assets/red-hat-logo-on-dark.svg" alt="Red Hat" />
+        <span>Red Hat OpenShift AI</span>
+      </header>
+
+      <main class="landing-main">
+        <p class="eyebrow red">Generative AI · Connecting models to data</p>
+        <h1 id="landing-title">Build AI your business can trust.</h1>
+        <p>
+          A guided generative-AI journey: see how Red Hat OpenShift AI helps teams connect an LLM to enterprise
+          data, evaluate quality, improve behavior, reduce risk, and ship a governed AI application — on the same
+          platform that serves your predictive ML models.
+        </p>
+        <button id="startJourney" class="cta-button" type="button">View the journey</button>
+      </main>
+    </section>
+
+    <section id="graphScreen" class="screen graph-screen" hidden aria-labelledby="graph-title">
+      <header class="simple-header">
+        <div>
+          <p class="eyebrow">Red Hat OpenShift AI · Generative AI workflow</p>
+          <h1 id="graph-title">Connecting models to data</h1>
+        </div>
+        <button id="backToLanding" class="ghost-button dark" type="button">Back</button>
+      </header>
+
+      <main class="graph-main" aria-label="Decision tree journey map">
+        <div id="graphViewport" class="graph-viewport">
+          <div id="graphCanvas" class="graph-canvas">
+            <svg id="graphEdges" class="graph-edges" role="presentation" aria-hidden="true"></svg>
+            <div id="graphNodes" class="graph-nodes"></div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="graph-footer">
+        <span><i class="key-dot next"></i>Your next step</span>
+        <span><i class="key-dot visited"></i>Explored</span>
+        <span><i class="key-dot data"></i>Connect models to data</span>
+        <span><i class="key-dot decision"></i>Decision point</span>
+        <span><i class="key-dot platform"></i>Platform / serving</span>
+        <strong>Follow the red <em>Click</em> steps · greyed steps unlock as you go.</strong>
+      </footer>
+    </section>
+
+    <section id="detailScreen" class="screen detail-screen" hidden aria-labelledby="detail-title">
+      <header class="simple-header detail-header">
+        <button id="backToGraph" class="ghost-button" type="button">← Journey map</button>
+        <button id="restartJourney" class="ghost-button" type="button">Restart</button>
+      </header>
+      <main id="detailContent" class="detail-content"></main>
+    </section>
+
+    <script src="assets/vendor/dagre.min.js"></script>
+    <script src="app.js?v=23"></script>
+  </body>
+</html>

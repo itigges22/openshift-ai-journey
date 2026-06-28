@@ -1,0 +1,79 @@
+flowchart TD
+    START(["1 · Start: use case"]) --> CRIT["2 · Define success<br/>EvalHub Collections"]
+
+    CRIT --> DATA["3a · Prepare data<br/>docling"]
+    CRIT --> MODEL["3b · Choose a base model<br/>Model Catalog / AI Hub"]
+    DATA --> DEPLOY
+    MODEL --> DEPLOY
+
+    DEPLOY["4 · Deploy the candidate<br/>serve on vllm"] --> BASE["5 · Baseline eval — EvalHub<br/>diagnose where it fails"]
+    BASE --> FORK{"6 · Which dimension failed?"}
+
+    FORK -->|knowledge / facts<br/>lm-eval| RAG["Knowledge gap -> RAG"]
+    FORK -->|behavior / skill| QRETRAIN{"can you retrain?"}
+    FORK -->|safety / jailbreak<br/>Garak| REDTEAM["Safety gap -> Red teaming"]
+    FORK -->|speed / cost<br/>GuideLLM| PERF["Performance gap<br/>-> Inference pillar"]
+
+    %% ---- Knowledge branch ----
+    RAG --> QRAG{"hand-tuning painful?"}
+    QRAG -->|automate it| ARAG["AutoRAG"]
+    QRAG -->|agent decides| AGRAG["Agentic RAG"]
+    QRAG -->|graph / SQL data| ALTRAG["GraphRAG / SQL RAG<br/>roadmap"]
+
+    %% ---- Behavior branch ----
+    QRETRAIN -->|no, need it now| ITS["Inference-Time Scaling<br/>its_hub"]
+    QRETRAIN -->|fix instructions| PROMPT["Prompt Engineering"]
+    QRETRAIN -->|adapt the model| QDATA{"enough labeled data?"}
+    QDATA -->|no| SDG["SDG Hub"]
+    QDATA -->|yes| TRAIN["Training Hub<br/>SFT / OSFT"]
+    SDG --> TRAIN
+
+    %% ---- Safety branch (red teaming) ----
+    REDTEAM --> SDGADV["SDG Hub<br/>adversarial test data"]
+    SDGADV --> GARAK["Garak<br/>jailbreak + safety probes"]
+    GARAK --> GUARD["NeMo Guardrails<br/>runtime protection"]
+
+    %% ---- converge to re-serve ----
+    RAG --> RESERVE
+    ARAG --> RESERVE
+    AGRAG --> RESERVE
+    ALTRAG -.-> RESERVE
+    ITS --> RESERVE
+    PROMPT --> RESERVE
+    TRAIN --> RESERVE
+    GUARD --> RESERVE
+    PERF -.-> RESERVE
+
+    RESERVE["7 · Re-serve improved version<br/>vllm + llm-d"] --> VERIFY["8 · Verify — EvalHub<br/>re-run the same Collection"]
+    VERIFY --> GATE{"9 · Hit your thresholds?"}
+    GATE -->|no| T2D["Trace-to-Dataset<br/>failures become new data"]
+    T2D -->|feedback flywheel| DATA
+    GATE -->|yes| GOV["10 · Ship<br/>Governance: registry, RBAC, audit"]
+    GOV --> PROD["Production: agents build on the<br/>OpenAI-compatible Responses API<br/>via OGX / llama-stack<br/>(MCP + tools at the edge)"]
+
+    %% ---- legend (not wired into flow) ----
+    subgraph LEGEND["Legend"]
+        L1["Your pillar:<br/>Connecting Data to Models &amp; Agents"]
+        L2["Neighbor pillar<br/>Inference / Agentic"]
+        L3["Shared platform"]
+        L4{"Decision point"}
+    end
+
+    %% ---- styling ----
+    classDef mine fill:#d1e7dd,stroke:#0f5132,color:#000;
+    classDef neighbor fill:#f8d7da,stroke:#842029,color:#000;
+    classDef shared fill:#e2e3e5,stroke:#41464b,color:#000;
+    classDef decision fill:#fff3cd,stroke:#b8860b,color:#000;
+    classDef roadmap stroke-dasharray:5 5;
+
+    class DATA,RAG,ARAG,AGRAG,ITS,PROMPT,SDG,TRAIN,REDTEAM,SDGADV,GARAK,CRIT,BASE,VERIFY,T2D mine;
+    class DEPLOY,RESERVE,PERF,PROD,GUARD neighbor;
+    class START,MODEL,GOV shared;
+    class FORK,QRETRAIN,QRAG,QDATA,GATE decision;
+    class ALTRAG mine;
+    class ALTRAG roadmap;
+
+    class L1 mine;
+    class L2 neighbor;
+    class L3 shared;
+    class L4 decision;
