@@ -347,6 +347,7 @@ button:focus-visible { outline: 4px solid #73bcf7; outline-offset: 4px; }
 button.crumb:hover { color: #fff; background: rgba(255,255,255,.10); }
 .crumb.current { color: #fff; font-weight: 800; cursor: default; max-width: 24ch; }
 .crumb-sep { flex: 0 0 auto; color: #5b626d; font-size: .8rem; }
+.crumb-more { font-weight: 800; color: #aeb4bc; letter-spacing: .05em; }
 .deep-dive { margin: 1rem 0 0; font-size: .82rem; line-height: 1.4; color: var(--rh-gray-60, #6b7280); }
 .deep-dive a { color: inherit; text-decoration: none; border-bottom: 1px dashed rgba(238,0,0,.4); padding-bottom: 1px; }
 .deep-dive a:hover { color: var(--rh-red); border-bottom-color: var(--rh-red); }
