@@ -468,7 +468,6 @@ function labLinkHTML(n) {
   return `<a href="${LAB_BASE + path}" target="_blank" rel="noopener">Go deeper — try ${escapeHtml(topic)} hands-on in <strong>AIGenOps 501</strong> ↗</a>`;
 }
 
-let bcExpanded = false;
 function crumbHTML(id, current) {
   const n = nodesById[id];
   if (!n) return '';
@@ -482,26 +481,12 @@ function renderBreadcrumbs() {
   if (!bc) return;
   const crumbs = state.path.slice();
   if (state.currentId && !crumbs.includes(state.currentId)) crumbs.push(state.currentId); // off-path side trip
-
-  const TAIL = 3; // steps shown at the end (incl. current) when collapsed
-  let items;
-  if (bcExpanded || crumbs.length <= TAIL + 2) {
-    items = crumbs.map((id, i) => crumbHTML(id, i === crumbs.length - 1));
-  } else {
-    // first step · … · last few steps (so the current step is never cut off)
-    const tail = crumbs.slice(-TAIL);
-    items = [
-      crumbHTML(crumbs[0], false),
-      `<button type="button" class="crumb crumb-more" title="Show all steps" data-more="1">…</button>`,
-      ...tail.map((id, j) => crumbHTML(id, j === tail.length - 1)),
-    ];
-  }
-  bc.innerHTML = items.filter(Boolean).join('<span class="crumb-sep" aria-hidden="true">›</span>');
+  // render every step; the row wraps to multiple lines so nothing is ever cut off
+  bc.innerHTML = crumbs
+    .map((id, i) => crumbHTML(id, i === crumbs.length - 1))
+    .filter(Boolean)
+    .join('<span class="crumb-sep" aria-hidden="true">›</span>');
   bc.querySelectorAll('[data-crumb]').forEach(b => b.addEventListener('click', () => openDetail(b.dataset.crumb)));
-  const more = bc.querySelector('[data-more]');
-  if (more) more.addEventListener('click', () => { bcExpanded = true; renderBreadcrumbs(); });
-  // when collapsed, keep the current step in view; when expanded, reveal the earlier ones
-  bc.scrollLeft = bcExpanded ? 0 : bc.scrollWidth;
 }
 
 function successorsOf(id) {
@@ -870,7 +855,6 @@ function renderDetail() {
   detailContent.querySelectorAll('[data-target]').forEach(btn => btn.addEventListener('click', () => openDetail(btn.dataset.target)));
   attachInteraction(n);
   mountExperience(n);
-  bcExpanded = false;
   renderBreadcrumbs();
 }
 
