@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Red Hat OpenShift AI | Connecting Models to Data</title>
-    <link rel="stylesheet" href="styles.css?v=24" />
+    <link rel="stylesheet" href="styles.css?v=25" />
   </head>
   <body>
     <section id="landingScreen" class="screen landing-screen" aria-labelledby="landing-title">
@@ -61,12 +61,13 @@
     <section id="detailScreen" class="screen detail-screen" hidden aria-labelledby="detail-title">
       <header class="simple-header detail-header">
         <button id="backToGraph" class="ghost-button" type="button">← Journey map</button>
+        <nav id="breadcrumbs" class="breadcrumbs" aria-label="Journey breadcrumb"></nav>
         <button id="restartJourney" class="ghost-button" type="button">Restart</button>
       </header>
       <main id="detailContent" class="detail-content"></main>
     </section>
 
     <script src="assets/vendor/dagre.min.js"></script>
-    <script src="app.js?v=24"></script>
+    <script src="app.js?v=25"></script>
   </body>
 </html>

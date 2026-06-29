@@ -427,6 +427,63 @@ const JOURNEY_START = 'START';
 let refitNext = true;
 const nodesById = Object.fromEntries(story.nodes.map(n => [n.id, n]));
 
+// Subtle "go deeper" links into the AIGenOps 501 hands-on lab, mapped per step.
+// [docsify path ('' = lab home), short topic phrase]
+const LAB_BASE = 'https://rhoai-genaiops.github.io/lab-instructions/#/';
+const LAB_LINKS = {
+  START: ['1-the-ai-orientation/', 'the GenAI lifecycle'],
+  WORKLOAD: ['1-the-ai-orientation/2c-model-mechanics', 'how models actually work'],
+  AUTOML: ['', 'building on the platform'],
+  MLFEED: ['7-honor-code/3-llama-stack-integration', 'wiring tools through Llama Stack'],
+  CRIT: ['4-ready-to-scale-201/1-evaluate-genai-applications', 'GenAI evaluation'],
+  DATA: ['5-grounded-ai/4-docling', 'document prep with Docling'],
+  MODEL: ['9-on-prem-practicum/1-deploy-llms', 'deploying an LLM'],
+  DEPLOY: ['9-on-prem-practicum/1-deploy-llms', 'serving on KServe / vLLM'],
+  BASE: ['4-ready-to-scale-201/1-evaluate-genai-applications', 'GenAI evaluation'],
+  FORK: ['6-observability/5-feedback-loops', 'feedback loops'],
+  RAG: ['5-grounded-ai/1-intro-to-rag', 'building RAG'],
+  QRAG: ['5-grounded-ai/2-rag-basics', 'tuning retrieval'],
+  ARAG: ['5-grounded-ai/8-rag-evals', 'evaluating RAG'],
+  AGRAG: ['8-agents/2-agentic-workflows', 'agentic workflows'],
+  ALTRAG: ['5-grounded-ai/3-vector-databases', 'vector stores'],
+  QRETRAIN: ['12-fine-tuning/1-fine-tune-a-model', 'fine-tuning a model'],
+  ITS: ['10-model-optimization/', 'model optimization'],
+  PROMPT: ['2-linguistics/1-prompt-engineering', 'prompt engineering'],
+  QDATA: ['12-fine-tuning/1-fine-tune-a-model', 'data for fine-tuning'],
+  SDG: ['12-fine-tuning/1-fine-tune-a-model', 'data for fine-tuning'],
+  TRAIN: ['12-fine-tuning/1-fine-tune-a-model', 'fine-tuning a model'],
+  REDTEAM: ['7-honor-code/1-guardrails', 'guardrails & safety'],
+  SDGADV: ['7-honor-code/1-guardrails', 'guardrails & safety'],
+  GARAK: ['7-honor-code/4-automate-checks', 'automating safety checks'],
+  GUARD: ['7-honor-code/2-nemo-guardrails', 'NeMo Guardrails'],
+  RESERVE: ['9-on-prem-practicum/1-deploy-llms', 'serving an LLM'],
+  VERIFY: ['4-ready-to-scale-201/1-evaluate-genai-applications', 'GenAI evaluation'],
+  GATE: ['6-observability/2-metrics', 'production metrics'],
+  T2D: ['6-observability/5-feedback-loops', 'feedback loops'],
+  GOV: ['6-observability/2-metrics', 'observability & governance'],
+  PROD: ['8-agents/4-take-agents-to-prod', 'taking agents to production'],
+};
+function labLinkHTML(n) {
+  const [path, topic] = LAB_LINKS[n.id] || ['', 'the platform'];
+  return `<a href="${LAB_BASE + path}" target="_blank" rel="noopener">Go deeper — try ${escapeHtml(topic)} hands-on in <strong>AIGenOps 501</strong> ↗</a>`;
+}
+
+function renderBreadcrumbs() {
+  const bc = document.getElementById('breadcrumbs');
+  if (!bc) return;
+  const crumbs = state.path.slice();
+  if (state.currentId && !crumbs.includes(state.currentId)) crumbs.push(state.currentId); // off-path side trip
+  bc.innerHTML = crumbs.map((id, i) => {
+    const n = nodesById[id];
+    if (!n) return '';
+    const label = escapeHtml(shortTitle(n.title));
+    return i === crumbs.length - 1
+      ? `<span class="crumb current" aria-current="step">${label}</span>`
+      : `<button type="button" class="crumb" data-crumb="${escapeAttr(id)}">${label}</button>`;
+  }).join('<span class="crumb-sep" aria-hidden="true">›</span>');
+  bc.querySelectorAll('[data-crumb]').forEach(b => b.addEventListener('click', () => openDetail(b.dataset.crumb)));
+}
+
 function successorsOf(id) {
   return story.edges.filter(e => e.from === id).map(e => e.to);
 }
@@ -787,11 +844,13 @@ function renderDetail() {
       <div class="choices">
         ${choices || '<button class="choice-button" type="button" data-target="START">Open first step<span>Return to the start of the journey.</span></button>'}
       </div>
+      <p class="deep-dive">${labLinkHTML(n)}</p>
     </aside>
   `;
   detailContent.querySelectorAll('[data-target]').forEach(btn => btn.addEventListener('click', () => openDetail(btn.dataset.target)));
   attachInteraction(n);
   mountExperience(n);
+  renderBreadcrumbs();
 }
 
 function renderInteraction(n) {
