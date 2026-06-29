@@ -340,7 +340,8 @@ button:focus-visible { outline: 4px solid #73bcf7; outline-offset: 4px; }
   background: #151515;
   color: #fff;
 }
-.detail-header { background: transparent; border: 0; box-shadow: none; min-height: 54px; padding: 0; display: flex; align-items: center; gap: .75rem; }
+.detail-header { background: transparent; border: 0; box-shadow: none; min-height: 54px; padding: 0; display: flex; align-items: flex-start; gap: .75rem; }
+.detail-header .ghost-button { flex: 0 0 auto; white-space: nowrap; align-self: flex-start; }
 .breadcrumbs { display: flex; flex-wrap: wrap; align-items: center; gap: .1rem .25rem; flex: 1 1 auto; min-width: 0; padding: .2rem 0; }
 .crumb { flex: 0 0 auto; white-space: nowrap; background: transparent; border: 0; color: #8b9098; font: inherit; font-size: .82rem; font-weight: 600; padding: .2rem .4rem; border-radius: 7px; cursor: pointer; }
 button.crumb:hover { color: #fff; background: rgba(255,255,255,.10); }
