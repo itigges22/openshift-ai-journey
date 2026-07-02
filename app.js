@@ -5,7 +5,7 @@
 const story = {
   nodes: [
     node('START', '1 · Business goal', 'dispute assistant + workload choice', 'shared', 0, 0, 'Intake', {
-      problem: 'The bank wants an assistant that answers dispute questions, collects evidence, and flags fraud. It has to be safe enough for a regulated business.',
+      problem: 'Every later step is measured against these targets. Without them, nobody can say whether the assistant is ready to ship.',
       why: 'Define the outcome first: what the assistant must do, and the numbers it must hit.',
       demoTitle: 'Use-case intake',
       metrics: [['Manual handle time', '18 min', 'bad'], ['Launch target', '≤ 12 min', 'good'], ['Unsafe-response ceiling', '< 0.5%', 'good']],
@@ -13,7 +13,7 @@ const story = {
       button: 'Create launch brief'
     }),
     node('AUTOML', 'Predictive model', 'AutoML → assistant tool · Tech Preview', 'shared', 0, 0, 'Build', {
-      problem: 'Fraud risk is a scoring problem on structured data. A classic ML model handles it better than an LLM.',
+      problem: 'The assistant needs a reliable fraud signal it cannot produce itself. A classic scoring model beats an LLM at this, and here it becomes a tool the assistant calls.',
       why: 'Build the fraud scorer with AutoML, then hand it to the assistant as a tool.',
       demoTitle: 'AutoML run + tool wiring',
       metrics: [['Task', 'Fraud scoring', 'good'], ['Built with', 'AutoML (TP)', 'good'], ['Exposed as', 'LLM tool', 'good']],
@@ -21,7 +21,7 @@ const story = {
       button: 'Build & connect'
     }),
     node('CRIT', '2 · Set quality targets', 'EvalHub Collection', 'data', 0, 0, 'Measure', {
-      problem: 'Without a shared definition of good, every later fix is a guess.',
+      problem: 'These targets become the pass or fail bar for the baseline, every improvement, and the launch gate. Skip this and quality stays a matter of opinion.',
       why: 'Turn the launch targets into repeatable checks that follow every model candidate.',
       demoTitle: 'Launch policy',
       metrics: [['Grounding target', '92%', 'good'], ['Escalation target', '95%', 'good'], ['Safety target', '99.5%', 'good']],
@@ -29,7 +29,7 @@ const story = {
       button: 'Save collection'
     }),
     node('DATA', '3 · Prepare enterprise data', 'docling', 'data', 0, 0, 'Data prep', {
-      problem: 'Policy PDFs and dispute forms are useless to a model until they become clean, cited chunks.',
+      problem: 'RAG, evals, and fine-tuning are only as good as the documents behind them. Raw PDFs cannot be searched, cited, or PII-masked.',
       why: 'Docling turns messy bank PDFs into clean, cited, PII-masked chunks.',
       demoTitle: 'Document conversion',
       metrics: [['Documents converted', '1,284', 'good'], ['Chunks with citations', '98%', 'good'], ['PII fields masked', '100%', 'good']],
@@ -37,7 +37,7 @@ const story = {
       button: 'Convert documents'
     }),
     node('MODEL', '4 · Select & serve a model', 'AI hub catalog → KServe + vLLM', 'neighbor', 0, 0, 'Serve', {
-      problem: 'You need a base model that fits your cost and latency budget, served where every team can measure it.',
+      problem: 'Every team needs to test against the same live endpoint, and cost and latency are locked in by this pick.',
       why: 'Pick a validated model from the catalog and it deploys straight to a live endpoint.',
       demoTitle: 'Pick a model, get an endpoint',
       metrics: [['Context window', '128k', 'good'], ['Cost / 1k chats', '$2.40', 'good'], ['Endpoint', 'OpenAI-compatible', 'good']],
@@ -45,7 +45,7 @@ const story = {
       button: 'Select & serve'
     }),
     node('BASE', '5 · Baseline eval', 'EvalHub diagnosis', 'data', 0, 0, 'Measure', {
-      problem: 'The assistant sounds fluent. The baseline shows where it actually fails.',
+      problem: 'You cannot fix what you have not measured. The baseline shows which gap (knowledge, behavior, or safety) deserves the first investment.',
       why: 'Find out where the assistant actually fails before changing anything.',
       demoTitle: 'Baseline result',
       metrics: [['Policy grounded', '71%', 'bad'], ['Escalation recall', '82%', 'bad'], ['Safety pass', '97.8%', 'bad']],
@@ -53,14 +53,14 @@ const story = {
       button: 'Run baseline eval'
     }),
     node('FORK', '6 · Choose the improvement path', 'route by evidence', 'decision', 0, 0, 'Decide', {
-      problem: 'Three gaps, one team. Let the evidence pick the first fix.',
+      problem: 'Fixing the wrong gap wastes weeks. The baseline evidence points at the branch with the biggest payoff.',
       why: 'Let the baseline evidence choose the branch: knowledge, behavior, or safety.',
       demoTitle: 'Failure router',
       output: 'Pick the branch that matches your biggest gap.',
       button: 'Route failure'
     }),
     node('RAG', 'Ground with RAG', 'retrieval + citations', 'data', 0, 0, 'Improve', {
-      problem: 'The policy answers already exist in bank documents. The model just cannot cite them.',
+      problem: 'Customers get outdated policy answers today. Grounding makes every answer current and checkable against the real document.',
       why: 'Ground every answer in bank documents, with citations.',
       demoTitle: 'Grounded answer comparison',
       metrics: [['Grounded answers', '71% → 89%', 'good'], ['Citation coverage', '42% → 96%', 'good'], ['Stale answers', '18% → 4%', 'good']],
@@ -68,7 +68,7 @@ const story = {
       button: 'Attach retrieval context'
     }),
     node('ARAG', 'AutoRAG', 'automated tuning · Tech Preview', 'data', 0, 0, 'Optimize', {
-      problem: 'Hand-tuning chunk sizes, retrievers, and rerankers takes days and still misses.',
+      problem: 'Manual retrieval tuning takes days per change. Automated search keeps retrieval tuned as documents and models change.',
       why: 'AutoRAG sweeps retrieval configurations and keeps the one that best clears your eval.',
       demoTitle: 'AutoRAG experiment board',
       metrics: [['Configs tested', '36', 'good'], ['Best grounded score', '94%', 'good'], ['Latency delta', '+180ms', 'good']],
@@ -76,7 +76,7 @@ const story = {
       button: 'Run AutoRAG sweep'
     }),
     node('AGRAG', 'Agentic RAG', 'retrieval + tools on demand', 'data', 0, 0, 'Optimize', {
-      problem: 'Not every question needs retrieval. Some need a tool call or a follow-up question first.',
+      problem: 'Retrieving on every turn is slow and often wrong. Letting the agent choose cuts noise, and it can pull in the fraud score as a tool.',
       why: 'The agent decides per step: retrieve policy, call the fraud tool, or ask the customer.',
       demoTitle: 'Tool-choice trace',
       metrics: [['Correct tool choice', '91%', 'good'], ['Unneeded retrieval', '↓ 38%', 'good'], ['Clarifying questions', '+22%', 'good']],
@@ -84,7 +84,7 @@ const story = {
       button: 'Inspect agent trace'
     }),
     node('ALTRAG', 'Graph / SQL retrieval', 'industry pattern', 'data roadmap', 0, 0, 'Pattern', {
-      problem: 'Some answers live in relationships: account status, merchant, claim history.',
+      problem: 'Some answers need account and merchant facts that never appear in policy text. Only structured retrieval can join them.',
       why: 'An industry pattern you can build here: retrieval over structured relationships.',
       demoTitle: 'Structured retrieval preview',
       metrics: [['Structured facts joined', '4', 'good'], ['Manual lookup avoided', 'Yes', 'good'], ['Availability', 'Build-your-own', 'bad']],
@@ -92,14 +92,14 @@ const story = {
       button: 'Preview structured context'
     }),
     node('BEHAVE', 'Fix behavior', 'pick the lightest fix that holds', 'decision', 0, 0, 'Decide', {
-      problem: 'The model has the facts but still misses escalations and asks poor follow-up questions.',
+      problem: 'Each fix has a different cost: minutes, a day, or weeks of data work. Picking wrong burns the pilot timeline.',
       why: 'Pick the lightest fix that holds: runtime reasoning, better instructions, or fine-tuning.',
       demoTitle: 'Customization decision',
       output: 'Compare time, data needed, and durability. Then pick a path.',
       button: 'Choose behavior fix'
     }),
     node('ITS', 'Inference-time scaling', 'its_hub', 'data', 0, 0, 'Improve', {
-      problem: 'You cannot retrain before the pilot, but high-risk claims need better reasoning today.',
+      problem: 'A missed fraud escalation costs far more than extra compute. Spending it only on high-risk claims keeps latency in budget.',
       why: 'Buy better reasoning at runtime with its_hub. No retraining.',
       demoTitle: 'Strategy chooser',
       metrics: [['Escalation recall', '82% → 91%', 'good'], ['P95 latency', '3.8s → 5.6s', 'bad'], ['Applied to', 'High risk only', 'good']],
@@ -107,7 +107,7 @@ const story = {
       button: 'Apply inference-time scaling'
     }),
     node('PROMPT', 'Prompt engineering', 'instructions & format', 'data', 0, 0, 'Improve', {
-      problem: 'Right facts, wrong delivery. Answers sound final while disputes are still under investigation.',
+      problem: 'An overconfident answer about an open dispute is a compliance problem. Better instructions fix the delivery in a day.',
       why: 'Clearer instructions are the fastest fix when the knowledge is already there.',
       demoTitle: 'Prompt diff',
       metrics: [['Format compliance', '76% → 96%', 'good'], ['Overconfident claims', '14% → 3%', 'good'], ['Engineering time', '1 day', 'good']],
@@ -115,7 +115,7 @@ const story = {
       button: 'Apply prompt patch'
     }),
     node('TRAIN', 'Create data & fine-tune', 'SDG Hub + Training Hub', 'data', 0, 0, 'Adapt', {
-      problem: 'Durable behavior change needs about 2,000 good examples. The bank has 420.',
+      problem: 'Prompt fixes drift; tuned weights hold. The bank has 420 examples and needs about 2,000, so the data gets generated first.',
       why: 'Generate the missing training data with SDG Hub, then fine-tune with Training Hub.',
       demoTitle: 'Synthetic data + fine-tuning run',
       metrics: [['Labeled examples', '420 → 2,170', 'good'], ['Escalation recall', '82% → 96%', 'good'], ['Regression alerts', '2', 'bad']],
@@ -123,7 +123,7 @@ const story = {
       button: 'Generate data & train'
     }),
     node('REDTEAM', 'Red team the assistant', 'attacks + adversarial data', 'data', 0, 0, 'Probe', {
-      problem: 'Attackers will not use your test prompts. Find the failures before customers do.',
+      problem: 'The baseline only tests honest users. Real attackers try impersonation, encoded requests, and emotional pressure.',
       why: 'Attack your own assistant to find the jailbreaks before customers do.',
       demoTitle: 'Attack campaign',
       metrics: [['Attack prompts', '320', 'good'], ['Successful jailbreaks', '7.2%', 'bad'], ['High-severity findings', '11', 'bad']],
@@ -131,7 +131,7 @@ const story = {
       button: 'Launch red-team campaign'
     }),
     node('GARAK', 'Garak safety probes', 'repeatable scanning · Tech Preview', 'data', 0, 0, 'Probe', {
-      problem: 'One-off findings go stale. Safety needs a regression suite that runs on every candidate.',
+      problem: 'Every new candidate can regress on old attacks. A saved probe suite catches that automatically instead of relying on memory.',
       why: 'Garak turns safety testing into a saved, repeatable probe suite.',
       demoTitle: 'Probe results',
       metrics: [['Probe pass rate', '97.8% → 99.6%', 'good'], ['Critical failures', '3 → 0', 'good'], ['Regression suite', 'Saved', 'good']],
@@ -139,7 +139,7 @@ const story = {
       button: 'Run Garak probes'
     }),
     node('GUARD', 'Runtime guardrails', 'TrustyAI Guardrails Orchestrator', 'neighbor', 0, 0, 'Protect', {
-      problem: 'Even a safer model needs a runtime backstop for PII, unsafe advice, and required handoffs.',
+      problem: 'No model is jailbreak-proof. Runtime screening is the last line of defense before a customer sees the answer.',
       why: 'Guardrails screen every request and response at runtime, as a backstop.',
       demoTitle: 'Guardrail verdicts',
       metrics: [['Unsafe blocked', '99.7%', 'good'], ['False blocks', '1.8%', 'good'], ['Human handoffs', '+12%', 'good']],
@@ -147,7 +147,7 @@ const story = {
       button: 'Test guardrails'
     }),
     node('VERIFY', '7 · Re-serve & verify', 'v2 + the same EvalHub run', 'data', 0, 0, 'Measure', {
-      problem: 'Did the fix work? Did it break anything else?',
+      problem: 'Improvements you cannot prove do not ship in a regulated bank. Re-running the same checks makes before and after comparable.',
       why: 'Prove the fix worked: v2 is measured with the exact same checks as the baseline.',
       demoTitle: 'Verification report',
       metrics: [['Policy grounded', '94%', 'good'], ['Escalation recall', '96%', 'good'], ['Safety pass', '99.6%', 'good']],
@@ -155,14 +155,14 @@ const story = {
       button: 'Re-run collection'
     }),
     node('GATE', '8 · Ready for production?', 'launch gate', 'decision', 0, 0, 'Decide', {
-      problem: 'Ship it, or send the failures back into the data loop?',
+      problem: 'A clear numeric bar keeps the launch decision out of meeting-room opinion. The numbers decide.',
       why: 'Verified numbers meet your launch policy: pass ships, fail loops back into data.',
       demoTitle: 'Threshold gate',
       output: 'Tune the thresholds and watch the candidate ship or loop back.',
       button: 'Evaluate gate'
     }),
     node('T2D', 'Trace-to-Dataset', 'feedback flywheel', 'data', 0, 0, 'Learn', {
-      problem: 'A failure just taught you something. Keep it.',
+      problem: 'Production failures repeat until they become test and training data. This step makes each one a permanent lesson.',
       why: 'Every failure becomes new eval and training data. That is the flywheel.',
       demoTitle: 'Trace conversion',
       metrics: [['Traces reviewed', '48', 'good'], ['New eval items', '31', 'good'], ['New training candidates', '17', 'good']],
@@ -170,7 +170,7 @@ const story = {
       button: 'Convert trace to dataset'
     }),
     node('GOV', '9 · Govern & ship', 'registry, audit → Responses API', 'shared', 0, 0, 'Ship', {
-      problem: 'A regulated bank needs lineage, approvals, and a rollback plan before anything goes live.',
+      problem: 'Auditors will ask who approved this, what data shaped it, and how to roll it back. This step is that answer.',
       why: 'Ship with evidence: lineage, approvals, rollback, then one production API call.',
       demoTitle: 'Release bundle + production call',
       metrics: [['Approvals', '4/4', 'good'], ['Audit artifacts', 'Complete', 'good'], ['API', 'OpenAI-compatible', 'good']],
@@ -645,7 +645,7 @@ function renderDetail() {
         </div>
         <h1 id="detail-title">${escapeHtml(n.title)}</h1>
         <p class="step-what">${escapeHtml(n.why)}</p>
-        <p class="step-why">${escapeHtml(n.problem)}</p>
+        <p class="step-why"><b>Why it matters:</b> ${escapeHtml(n.problem)}</p>
         ${journeyChipHTML()}
       </div>
       <div class="detail-body">
@@ -843,13 +843,13 @@ function currentChecks() {
 
 const MODELS = [
   { id: 'granite', name: 'Granite 4.1 8B Instruct', vendor: 'Red Hat · IBM', tag: 'Compact · efficient',
-    blurb: 'Instruction-tuned for low cost and latency. A strong efficient default.',
+    blurb: 'Pick when cost and speed rule: high call volume, mostly routine questions.',
     context: '128K', cost: 1.4, latency: 1.2, base: { grounding: 71, escalation: 74, safety: 96.4 } },
   { id: 'llama', name: 'Llama 3.3 70B Instruct', vendor: 'Meta', tag: 'Large · strongest reasoning',
-    blurb: 'Highest reasoning quality for complex escalations, at higher cost.',
+    blurb: 'Pick when hard reasoning matters more than cost: complex, ambiguous escalations.',
     context: '128K', cost: 3.1, latency: 2.9, base: { grounding: 80, escalation: 84, safety: 97.2 } },
   { id: 'mistral', name: 'Mistral Small 3.1 24B Instruct', vendor: 'Mistral AI', tag: 'Balanced · mid-size',
-    blurb: 'A mid-size balance of speed, cost, and answer quality.',
+    blurb: 'Pick for the middle ground: stronger reasoning than an 8B without 70B cost.',
     context: '128K', cost: 2.0, latency: 1.8, base: { grounding: 75, escalation: 79, safety: 95.6 } }
 ];
 
@@ -1309,7 +1309,7 @@ function mountModelServe(card) {
     const sel = journey.model;
     card.innerHTML = `
       <strong>Choose your candidate model</strong>
-      <p class="demo-sub">Validated models from the AI hub catalog. Your pick deploys straight to KServe with the vLLM runtime.</p>
+      <p class="demo-sub">The tradeoff is cost and speed against reasoning depth. Any pick deploys straight to KServe with the vLLM runtime, and the baseline eval will tell you if you chose wrong.</p>
       <div class="model-grid">
         ${MODELS.map(m => `
           <button class="model-card ${sel && sel.id === m.id ? 'selected' : ''}" data-model="${m.id}" type="button">
