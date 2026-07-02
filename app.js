@@ -28,15 +28,7 @@ const story = {
       output: 'Collection saved. Baseline, verification, and the launch gate all use these same checks.',
       button: 'Save collection'
     }),
-    node('MODEL', '3 · Select a model', 'AI hub model catalog', 'shared', 0, 0, 'Select', {
-      problem: 'You need a base model that follows instructions and fits your cost and latency budget.',
-      why: 'Pick a validated model from the AI hub catalog. Your choice carries through the rest of the journey.',
-      demoTitle: 'Candidate comparison',
-      metrics: [['Context window', '128k', 'good'], ['Cost / 1k chats', '$2.40', 'good'], ['Initial risk', 'Unknown', 'bad']],
-      output: 'Candidate selected and recorded.',
-      button: 'Select candidate'
-    }),
-    node('DATA', '4 · Prepare enterprise data', 'docling', 'data', 0, 0, 'Data prep', {
+    node('DATA', '3 · Prepare enterprise data', 'docling', 'data', 0, 0, 'Data prep', {
       problem: 'Policy PDFs and dispute forms are useless to a model until they become clean, cited chunks.',
       why: 'Docling converts messy bank documents into structured, PII-masked chunks for retrieval, evals, and training.',
       demoTitle: 'Document conversion',
@@ -44,15 +36,15 @@ const story = {
       output: 'The policy corpus is ready for retrieval, evaluation, and training.',
       button: 'Convert documents'
     }),
-    node('DEPLOY', '5 · Serve the model', 'KServe + vLLM', 'neighbor', 0, 0, 'Serve', {
-      problem: 'Every team needs to measure the same endpoint, not a private copy of the model.',
-      why: 'KServe with the vLLM runtime serves one OpenAI-compatible endpoint. Use llm-d when you need distributed inference.',
-      demoTitle: 'Serving endpoint',
-      metrics: [['P50 latency', '1.1s', 'good'], ['P95 latency', '3.8s', 'bad'], ['Endpoint health', 'Ready', 'good']],
-      output: 'The candidate is live behind an OpenAI-compatible endpoint.',
-      button: 'Deploy candidate'
+    node('MODEL', '4 · Select & serve a model', 'AI hub catalog → KServe + vLLM', 'neighbor', 0, 0, 'Serve', {
+      problem: 'You need a base model that fits your cost and latency budget, served where every team can measure it.',
+      why: 'Pick a validated model from the AI hub catalog. It deploys on KServe with the vLLM runtime behind one OpenAI-compatible endpoint.',
+      demoTitle: 'Pick a model, get an endpoint',
+      metrics: [['Context window', '128k', 'good'], ['Cost / 1k chats', '$2.40', 'good'], ['Endpoint', 'OpenAI-compatible', 'good']],
+      output: 'The candidate is live and ready for the baseline.',
+      button: 'Select & serve'
     }),
-    node('BASE', '6 · Baseline eval', 'EvalHub diagnosis', 'data', 0, 0, 'Measure', {
+    node('BASE', '5 · Baseline eval', 'EvalHub diagnosis', 'data', 0, 0, 'Measure', {
       problem: 'The assistant sounds fluent. The baseline shows where it actually fails.',
       why: 'One eval run tells you whether the gap is knowledge, behavior, or safety, so you fix the right thing first.',
       demoTitle: 'Baseline result',
@@ -60,38 +52,101 @@ const story = {
       output: 'Baseline complete. The failures now route the journey.',
       button: 'Run baseline eval'
     }),
-    node('FORK', '7 · Choose the improvement path', 'route by evidence', 'decision', 0, 0, 'Decide', {
+    node('FORK', '6 · Choose the improvement path', 'route by evidence', 'decision', 0, 0, 'Decide', {
       problem: 'Three gaps, one team. Let the evidence pick the first fix.',
       why: 'Missing knowledge points to RAG. Wrong behavior points to customization. Safety failures point to hardening. The baseline tells you which.',
       demoTitle: 'Failure router',
       output: 'Pick the branch that matches your biggest gap.',
       button: 'Route failure'
     }),
-    node('RAG', 'Connect the data', 'RAG · AutoRAG · agents', 'data', 0, 0, 'Improve', {
+    node('RAG', 'Ground with RAG', 'retrieval + citations', 'data', 0, 0, 'Improve', {
       problem: 'The policy answers already exist in bank documents. The model just cannot cite them.',
-      why: 'Ground answers in your prepared documents, then pick how far to take retrieval: automated tuning, an agent that chooses tools, or structured data.',
-      demoTitle: 'Grounding options',
+      why: 'RAG grounds answers in your prepared documents, with citations. Then choose how far to optimize retrieval.',
+      demoTitle: 'Grounded answer comparison',
       metrics: [['Grounded answers', '71% → 89%', 'good'], ['Citation coverage', '42% → 96%', 'good'], ['Stale answers', '18% → 4%', 'good']],
       output: 'Answers now cite the current policy section instead of guessing.',
       button: 'Attach retrieval context'
     }),
-    node('BEHAVE', 'Fix behavior', 'prompts · its_hub · fine-tuning', 'data', 0, 0, 'Improve', {
+    node('ARAG', 'AutoRAG', 'automated tuning · Tech Preview', 'data', 0, 0, 'Optimize', {
+      problem: 'Hand-tuning chunk sizes, retrievers, and rerankers takes days and still misses.',
+      why: 'AutoRAG (Tech Preview) sweeps retrieval configurations and keeps the one that best clears your eval collection.',
+      demoTitle: 'AutoRAG experiment board',
+      metrics: [['Configs tested', '36', 'good'], ['Best grounded score', '94%', 'good'], ['Latency delta', '+180ms', 'good']],
+      output: 'Best retrieval pipeline selected against the same collection.',
+      button: 'Run AutoRAG sweep'
+    }),
+    node('AGRAG', 'Agentic RAG', 'retrieval + tools on demand', 'data', 0, 0, 'Optimize', {
+      problem: 'Not every question needs retrieval. Some need a tool call or a follow-up question first.',
+      why: 'The agent decides per step: retrieve policy, call the fraud-risk tool, or ask the customer for what is missing.',
+      demoTitle: 'Tool-choice trace',
+      metrics: [['Correct tool choice', '91%', 'good'], ['Unneeded retrieval', '↓ 38%', 'good'], ['Clarifying questions', '+22%', 'good']],
+      output: 'The assistant retrieves only when needed, and uses the predictive fraud score as a tool.',
+      button: 'Inspect agent trace'
+    }),
+    node('ALTRAG', 'Graph / SQL retrieval', 'industry pattern', 'data roadmap', 0, 0, 'Pattern', {
+      problem: 'Some answers live in relationships: account status, merchant, claim history.',
+      why: 'Not a named OpenShift AI feature. It is an industry pattern you can build on the platform when structured facts drive the answer.',
+      demoTitle: 'Structured retrieval preview',
+      metrics: [['Structured facts joined', '4', 'good'], ['Manual lookup avoided', 'Yes', 'good'], ['Availability', 'Build-your-own', 'bad']],
+      output: 'Structured banking facts join the retrieval layer for relationship-heavy questions.',
+      button: 'Preview structured context'
+    }),
+    node('BEHAVE', 'Fix behavior', 'pick the lightest fix that holds', 'decision', 0, 0, 'Decide', {
       problem: 'The model has the facts but still misses escalations and asks poor follow-up questions.',
-      why: 'Pick the lightest fix that holds. Add reasoning at runtime, rewrite the instructions, or fine-tune on new data.',
-      demoTitle: 'Behavior fixes',
-      metrics: [['Escalation recall', '82% → 96%', 'good'], ['Format compliance', '76% → 96%', 'good'], ['Overconfident claims', '14% → 3%', 'good']],
-      output: 'The assistant asks for what it needs and escalates when it should.',
-      button: 'Apply behavior fix'
+      why: 'Pick the lightest fix that holds: more reasoning at runtime, better instructions, or fine-tuning with data.',
+      demoTitle: 'Customization decision',
+      output: 'Compare time, data needed, and durability. Then pick a path.',
+      button: 'Choose behavior fix'
     }),
-    node('SAFETY', 'Harden safety', 'red team · Garak · guardrails', 'data', 0, 0, 'Protect', {
+    node('ITS', 'Inference-time scaling', 'its_hub', 'data', 0, 0, 'Improve', {
+      problem: 'You cannot retrain before the pilot, but high-risk claims need better reasoning today.',
+      why: 'Spend extra compute at inference on the cases that need it. Pick a strategy from its_hub, no retraining.',
+      demoTitle: 'Strategy chooser',
+      metrics: [['Escalation recall', '82% → 91%', 'good'], ['P95 latency', '3.8s → 5.6s', 'bad'], ['Applied to', 'High risk only', 'good']],
+      output: 'More reasoning budget, only on claims likely to need escalation.',
+      button: 'Apply inference-time scaling'
+    }),
+    node('PROMPT', 'Prompt engineering', 'instructions & format', 'data', 0, 0, 'Improve', {
+      problem: 'Right facts, wrong delivery. Answers sound final while disputes are still under investigation.',
+      why: 'Clearer instructions and output format are the fastest behavior fix when the knowledge is already there.',
+      demoTitle: 'Prompt diff',
+      metrics: [['Format compliance', '76% → 96%', 'good'], ['Overconfident claims', '14% → 3%', 'good'], ['Engineering time', '1 day', 'good']],
+      output: 'Responses now cite policy, ask for the transaction date, and hand off suspected fraud.',
+      button: 'Apply prompt patch'
+    }),
+    node('TRAIN', 'Create data & fine-tune', 'SDG Hub + Training Hub', 'data', 0, 0, 'Adapt', {
+      problem: 'Durable behavior change needs about 2,000 good examples. The bank has 420.',
+      why: 'SDG Hub generates the missing examples from observed failures. Training Hub then fine-tunes the model (SFT / OSFT).',
+      demoTitle: 'Synthetic data + fine-tuning run',
+      metrics: [['Labeled examples', '420 → 2,170', 'good'], ['Escalation recall', '82% → 96%', 'good'], ['Regression alerts', '2', 'bad']],
+      output: 'A tuned candidate is ready to verify against the same collection.',
+      button: 'Generate data & train'
+    }),
+    node('REDTEAM', 'Red team the assistant', 'attacks + adversarial data', 'data', 0, 0, 'Probe', {
       problem: 'Attackers will not use your test prompts. Find the failures before customers do.',
-      why: 'Red team the assistant, turn the findings into a repeatable probe suite, and add runtime guardrails as a backstop.',
-      demoTitle: 'Safety hardening',
-      metrics: [['Successful jailbreaks', '7.2% → 0.4%', 'good'], ['Probe pass rate', '99.6%', 'good'], ['Unsafe blocked at runtime', '99.7%', 'good']],
-      output: 'Findings become repeatable tests, and unsafe requests are blocked or handed to a person.',
-      button: 'Run safety pass'
+      why: 'A red-team campaign finds the jailbreaks. SDG Hub expands each finding into whole families of attack variants.',
+      demoTitle: 'Attack campaign',
+      metrics: [['Attack prompts', '320', 'good'], ['Successful jailbreaks', '7.2%', 'bad'], ['High-severity findings', '11', 'bad']],
+      output: 'Findings become repeatable adversarial test data, not a one-off spreadsheet.',
+      button: 'Launch red-team campaign'
     }),
-    node('VERIFY', '8 · Re-serve & verify', 'v2 + the same EvalHub run', 'data', 0, 0, 'Measure', {
+    node('GARAK', 'Garak safety probes', 'repeatable scanning · Tech Preview', 'data', 0, 0, 'Probe', {
+      problem: 'One-off findings go stale. Safety needs a regression suite that runs on every candidate.',
+      why: 'Garak (Tech Preview in OpenShift AI) turns safety testing into a saved, repeatable probe suite.',
+      demoTitle: 'Probe results',
+      metrics: [['Probe pass rate', '97.8% → 99.6%', 'good'], ['Critical failures', '3 → 0', 'good'], ['Regression suite', 'Saved', 'good']],
+      output: 'The candidate passes the saved probe suite. Residual risks are recorded.',
+      button: 'Run Garak probes'
+    }),
+    node('GUARD', 'Runtime guardrails', 'TrustyAI Guardrails Orchestrator', 'neighbor', 0, 0, 'Protect', {
+      problem: 'Even a safer model needs a runtime backstop for PII, unsafe advice, and required handoffs.',
+      why: 'The TrustyAI Guardrails Orchestrator screens traffic at runtime with detectors like Granite Guardian. NeMo Guardrails is also supported.',
+      demoTitle: 'Guardrail verdicts',
+      metrics: [['Unsafe blocked', '99.7%', 'good'], ['False blocks', '1.8%', 'good'], ['Human handoffs', '+12%', 'good']],
+      output: 'Unsafe requests are blocked or routed to a human fraud specialist.',
+      button: 'Test guardrails'
+    }),
+    node('VERIFY', '7 · Re-serve & verify', 'v2 + the same EvalHub run', 'data', 0, 0, 'Measure', {
       problem: 'Did the fix work? Did it break anything else?',
       why: 'The improved v2 rolls out behind the same endpoint and the exact same collection runs again. Same checks, same thresholds.',
       demoTitle: 'Verification report',
@@ -99,7 +154,7 @@ const story = {
       output: 'Before and after, measured with the same checks.',
       button: 'Re-run collection'
     }),
-    node('GATE', '9 · Ready for production?', 'launch gate', 'decision', 0, 0, 'Decide', {
+    node('GATE', '8 · Ready for production?', 'launch gate', 'decision', 0, 0, 'Decide', {
       problem: 'Ship it, or send the failures back into the data loop?',
       why: 'The gate checks your verified numbers against the launch policy. Pass ships to governance. Fail feeds the flywheel.',
       demoTitle: 'Threshold gate',
@@ -114,7 +169,7 @@ const story = {
       output: 'The failure is now reusable data. Loop back to the improvement decision.',
       button: 'Convert trace to dataset'
     }),
-    node('GOV', '10 · Govern & ship', 'registry, audit → Responses API', 'shared', 0, 0, 'Ship', {
+    node('GOV', '9 · Govern & ship', 'registry, audit → Responses API', 'shared', 0, 0, 'Ship', {
       problem: 'A regulated bank needs lineage, approvals, and a rollback plan before anything goes live.',
       why: 'Governance bundles the evidence. The production app then calls the assistant through the OpenAI-compatible Responses API.',
       demoTitle: 'Release bundle + production call',
@@ -126,9 +181,12 @@ const story = {
   edges: [
     edge('START', 'CRIT', 'generative assistant'), edge('START', 'AUTOML', 'predictive model'),
     edge('AUTOML', 'CRIT', 'feeds the assistant'),
-    edge('CRIT', 'MODEL'), edge('MODEL', 'DATA'), edge('DATA', 'DEPLOY'), edge('DEPLOY', 'BASE'), edge('BASE', 'FORK'),
-    edge('FORK', 'RAG', 'knowledge / facts'), edge('FORK', 'BEHAVE', 'behavior / skill'), edge('FORK', 'SAFETY', 'safety / jailbreak'),
-    edge('RAG', 'VERIFY'), edge('BEHAVE', 'VERIFY'), edge('SAFETY', 'VERIFY'),
+    edge('CRIT', 'DATA'), edge('DATA', 'MODEL'), edge('MODEL', 'BASE'), edge('BASE', 'FORK'),
+    edge('FORK', 'RAG', 'knowledge / facts'), edge('FORK', 'BEHAVE', 'behavior / skill'), edge('FORK', 'REDTEAM', 'safety / jailbreak'),
+    edge('RAG', 'ARAG', 'automate tuning'), edge('RAG', 'AGRAG', 'agent decides'), edge('RAG', 'ALTRAG', 'structured data'), edge('RAG', 'VERIFY', 'good enough'),
+    edge('BEHAVE', 'ITS', 'need it now'), edge('BEHAVE', 'PROMPT', 'fix instructions'), edge('BEHAVE', 'TRAIN', 'adapt the model'),
+    edge('REDTEAM', 'GARAK'), edge('GARAK', 'GUARD'),
+    edge('ARAG', 'VERIFY'), edge('AGRAG', 'VERIFY'), edge('ALTRAG', 'VERIFY', 'pattern', true), edge('ITS', 'VERIFY'), edge('PROMPT', 'VERIFY'), edge('TRAIN', 'VERIFY'), edge('GUARD', 'VERIFY'),
     edge('VERIFY', 'GATE'), edge('GATE', 'T2D', 'no, loop back'), edge('T2D', 'FORK', 'feedback flywheel'), edge('GATE', 'GOV', 'yes, ship')
   ]
 };
@@ -189,13 +247,20 @@ const LAB_LINKS = {
   AUTOML: ['7-honor-code/3-llama-stack-integration', 'wiring tools through Llama Stack'],
   CRIT: ['4-ready-to-scale-201/1-evaluate-genai-applications', 'GenAI evaluation'],
   DATA: ['5-grounded-ai/4-docling', 'document prep with Docling'],
-  MODEL: ['9-on-prem-practicum/1-deploy-llms', 'deploying an LLM'],
-  DEPLOY: ['9-on-prem-practicum/1-deploy-llms', 'serving on KServe / vLLM'],
+  MODEL: ['9-on-prem-practicum/1-deploy-llms', 'serving on KServe / vLLM'],
   BASE: ['4-ready-to-scale-201/1-evaluate-genai-applications', 'GenAI evaluation'],
   FORK: ['6-observability/5-feedback-loops', 'feedback loops'],
   RAG: ['5-grounded-ai/1-intro-to-rag', 'building RAG'],
+  ARAG: ['5-grounded-ai/8-rag-evals', 'evaluating RAG'],
+  AGRAG: ['8-agents/2-agentic-workflows', 'agentic workflows'],
+  ALTRAG: ['5-grounded-ai/3-vector-databases', 'vector stores'],
   BEHAVE: ['12-fine-tuning/1-fine-tune-a-model', 'fine-tuning a model'],
-  SAFETY: ['7-honor-code/1-guardrails', 'guardrails & safety'],
+  ITS: ['10-model-optimization/', 'model optimization'],
+  PROMPT: ['2-linguistics/1-prompt-engineering', 'prompt engineering'],
+  TRAIN: ['12-fine-tuning/1-fine-tune-a-model', 'fine-tuning a model'],
+  REDTEAM: ['7-honor-code/1-guardrails', 'guardrails & safety'],
+  GARAK: ['7-honor-code/4-automate-checks', 'automating safety checks'],
+  GUARD: ['7-honor-code/2-nemo-guardrails', 'runtime guardrails'],
   VERIFY: ['4-ready-to-scale-201/1-evaluate-genai-applications', 'GenAI evaluation'],
   GATE: ['6-observability/2-metrics', 'production metrics'],
   T2D: ['6-observability/5-feedback-loops', 'feedback loops'],
@@ -833,7 +898,7 @@ function dominantGap() {
   const gaps = [
     { dim: 'grounding', label: 'Knowledge / policy grounding', node: 'RAG' },
     { dim: 'escalation', label: 'Escalation behavior', node: 'BEHAVE' },
-    { dim: 'safety', label: 'Safety / jailbreak', node: 'SAFETY' }
+    { dim: 'safety', label: 'Safety / jailbreak', node: 'REDTEAM' }
   ].map(g => ({ ...g, deficit: round1(THRESHOLDS[g.dim] - b[g.dim]) }));
   gaps.sort((a, z) => z.deficit - a.deficit);
   return gaps[0];
@@ -886,7 +951,7 @@ function runSequence(steps, { onStep, onDone } = {}) {
 /* ---- Continuity chip shown on every detail view ---- */
 function journeyChipHTML() {
   if (!journey.model) {
-    return '<div id="journeyChip" class="journey-chip empty"><i class="jc-dot"></i>No candidate yet. Start at “Select a model”.</div>';
+    return '<div id="journeyChip" class="journey-chip empty"><i class="jc-dot"></i>No candidate yet. Start at “Select & serve a model”.</div>';
   }
   const m = journey.model;
   const res = journey.verify || journey.baseline;
@@ -921,19 +986,18 @@ function mountExperience(n) {
   switch (n.id) {
     case 'START': return mountLaunchBrief(card);
     case 'AUTOML': return mountPredictive(card);
-    case 'MODEL': return mountModelPicker(card);
+    case 'MODEL': return mountModelServe(card);
     case 'CRIT': return mountCollection(card);
     case 'DATA': return mountDocling(card);
     case 'T2D': return mountTrace(card);
-    case 'DEPLOY': return mountDeploy(card, 'v1', 'baseline candidate');
     case 'BASE': return mountEval(card, 'baseline');
     case 'VERIFY': return mountEval(card, 'verify');
     case 'FORK': return mountForkRecommend(card);
-    case 'RAG': return mountKnowledge(card);
-    case 'BEHAVE': return mountBehavior(card);
-    case 'SAFETY': return mountSafety(card);
+    case 'BEHAVE': return mountRetrainDecision(card);
     case 'GATE': return mountGate(card);
     case 'GOV': return mountShip(card);
+    default:
+      if (IMPROVEMENTS[n.id]) return mountImprovement(card, n);
   }
 }
 
@@ -1001,43 +1065,6 @@ function mountLaunchBrief(card) {
   };
   btn.addEventListener('click', run);
   fx.after(300, run);
-}
-
-function mountModelPicker(card) {
-  const draw = () => {
-    const sel = journey.model;
-    card.innerHTML = `
-      <strong>Choose your candidate model</strong>
-      <p class="demo-sub">Validated models from the AI hub catalog. Your choice is carried through serving, evaluation, improvement, and release.</p>
-      <div class="model-grid">
-        ${MODELS.map(m => `
-          <button class="model-card ${sel && sel.id === m.id ? 'selected' : ''}" data-model="${m.id}" type="button">
-            <span class="model-tag">${escapeHtml(m.tag)}</span>
-            <strong>${escapeHtml(m.name)}</strong>
-            <span class="model-vendor">${escapeHtml(m.vendor)}</span>
-            <span class="model-blurb">${escapeHtml(m.blurb)}</span>
-            <span class="model-specs"><span><i>Context</i>${escapeHtml(m.context)}</span><span><i>Cost / 1k</i>$${m.cost.toFixed(2)}</span><span><i>p95</i>${m.latency.toFixed(1)}s</span></span>
-            <span class="model-check">Selected</span>
-          </button>`).join('')}
-      </div>
-      <div class="ml-genai">
-        <div class="mlg-foot"><b>One platform, both workloads.</b> This LLM serves with vLLM; your predictive fraud model serves on the same KServe platform and feeds the assistant as a tool.</div>
-      </div>
-      <div id="demoOutput" class="demo-output">${sel ? `<strong>${escapeHtml(sel.name)} selected.</strong> Ready to serve on KServe + vLLM and run the baseline EvalHub Collection.` : 'Select a model to begin your journey.'}</div>`;
-    card.querySelectorAll('.model-card').forEach(btn => btn.addEventListener('click', () => {
-      const m = MODELS.find(x => x.id === btn.dataset.model);
-      const changed = !journey.model || journey.model.id !== m.id;
-      journey.model = m;
-      if (changed) resetDownstream();
-      refreshChip();
-      draw();
-    }));
-    if (journey.model) {
-      const m = journey.model;
-      renderRail([['Context window', m.context, ''], ['Cost / 1k chats', `$${m.cost.toFixed(2)}`, 'good'], ['p95 latency', `${m.latency.toFixed(1)}s`, 'good']]);
-    }
-  };
-  draw();
 }
 
 /* ---- Predictive branch: AutoML builds the fraud model, then it is wired
@@ -1282,29 +1309,57 @@ function serveConnectionJSON(m, version, v) {
 }`;
 }
 
-function mountDeploy(card, version, label) {
-  if (!journey.model) { card.innerHTML = needModelHTML('serve a model'); wireNeedModel(card); return; }
+function mountModelServe(card) {
+  const draw = () => {
+    const sel = journey.model;
+    card.innerHTML = `
+      <strong>Choose your candidate model</strong>
+      <p class="demo-sub">Validated models from the AI hub catalog. Your pick deploys straight to KServe with the vLLM runtime.</p>
+      <div class="model-grid">
+        ${MODELS.map(m => `
+          <button class="model-card ${sel && sel.id === m.id ? 'selected' : ''}" data-model="${m.id}" type="button">
+            <span class="model-tag">${escapeHtml(m.tag)}</span>
+            <strong>${escapeHtml(m.name)}</strong>
+            <span class="model-vendor">${escapeHtml(m.vendor)}</span>
+            <span class="model-blurb">${escapeHtml(m.blurb)}</span>
+            <span class="model-specs"><span><i>Context</i>${escapeHtml(m.context)}</span><span><i>Cost / 1k</i>$${m.cost.toFixed(2)}</span><span><i>p95</i>${m.latency.toFixed(1)}s</span></span>
+            <span class="model-check">Selected</span>
+          </button>`).join('')}
+      </div>
+      <div id="servePanel"></div>
+      <div id="demoOutput" class="demo-output">${sel ? `Serving ${escapeHtml(sel.name)}\u2026` : 'Select a model to serve it.'}</div>`;
+    card.querySelectorAll('.model-card').forEach(btn => btn.addEventListener('click', () => {
+      const m = MODELS.find(x => x.id === btn.dataset.model);
+      const changed = !journey.model || journey.model.id !== m.id;
+      journey.model = m;
+      if (changed) resetDownstream();
+      refreshChip();
+      draw();
+    }));
+    if (sel) renderServe(card.querySelector('#servePanel'), card.querySelector('#demoOutput'));
+  };
+  draw();
+}
+
+// Serve the selected candidate on KServe + vLLM inside the model step.
+function renderServe(host, out) {
   const m = journey.model;
-  card.innerHTML = `
-    <strong>Serve ${escapeHtml(m.name)} · ${escapeHtml(version)}</strong>
-    <p class="demo-sub">Serve the ${escapeHtml(label)} on <b>KServe with the vLLM runtime</b> (you could also use a KServe RawDeployment or llm-d) behind one OpenAI-compatible endpoint.</p>
+  const version = journey.served && journey.served.version === 'v2' ? 'v2' : 'v1';
+  host.innerHTML = `
     <div class="run-progress"><div class="run-bar" id="depBar"></div></div>
     <ul class="run-steps" id="depSteps"></ul>
     <div class="serve-grid">
-      <div class="io-col"><span class="io-label">InferenceService · how it's served</span><pre class="code-snippet" id="depDescriptor">—</pre></div>
-      <div class="io-col"><span class="io-label">Connection data · how apps connect</span><pre class="code-snippet" id="depConn">—</pre></div>
+      <div class="io-col"><span class="io-label">InferenceService · how it's served</span><pre class="code-snippet" id="depDescriptor">\u2014</pre></div>
+      <div class="io-col"><span class="io-label">Connection data · how apps connect</span><pre class="code-snippet" id="depConn">\u2014</pre></div>
     </div>
-    <div id="demoOutput" class="demo-output">Endpoint provisioning…</div>
-    <button class="primary-action" id="depBtn" type="button">Deploy candidate</button>`;
-  const stepsHost = card.querySelector('#depSteps');
-  const bar = card.querySelector('#depBar');
-  const out = card.querySelector('#demoOutput');
-  const btn = card.querySelector('#depBtn');
-  const descriptorBox = card.querySelector('#depDescriptor');
-  const connBox = card.querySelector('#depConn');
+    <div class="demo-actions"><button class="primary-action" id="depBtn" type="button">Re-deploy</button></div>`;
+  const stepsHost = host.querySelector('#depSteps');
+  const bar = host.querySelector('#depBar');
+  const btn = host.querySelector('#depBtn');
+  const descriptorBox = host.querySelector('#depDescriptor');
+  const connBox = host.querySelector('#depConn');
   let busy = false;
   let els = [];
-
   const apply = (v, animate) => {
     const steps = [
       `Pulling model image · ${m.name}`,
@@ -1315,27 +1370,24 @@ function mountDeploy(card, version, label) {
     ];
     stepsHost.innerHTML = steps.map(s => `<li><i class="dot"></i><span>${escapeHtml(s)}</span></li>`).join('');
     els = [...stepsHost.querySelectorAll('li')];
-    if (animate) { descriptorBox.textContent = '—'; connBox.textContent = '—'; }
-  };
-  const showJSON = v => {
-    if (reducedMotion()) { descriptorBox.textContent = serveDescriptorJSON(m, version, v); connBox.textContent = serveConnectionJSON(m, version, v); return; }
-    typeInto(descriptorBox, serveDescriptorJSON(m, version, v), 8);
-    typeInto(connBox, serveConnectionJSON(m, version, v), 8);
+    if (animate) { descriptorBox.textContent = '\u2014'; connBox.textContent = '\u2014'; }
   };
   const finish = v => {
     els.forEach(li => { li.classList.remove('running'); li.classList.add('done'); });
     bar.style.width = '100%';
     journey.served = { version };
-    showJSON(v);
-    out.innerHTML = `<strong>${escapeHtml(m.name)} ${escapeHtml(version)} is live on ${escapeHtml(v.platform)}.</strong> Served with the vLLM runtime on ${escapeHtml(v.accel)} (${v.region}) behind an OpenAI-compatible endpoint, ready for evaluation.`;
-    btn.disabled = false; btn.textContent = 'Re-deploy'; busy = false;
+    if (reducedMotion()) { descriptorBox.textContent = serveDescriptorJSON(m, version, v); connBox.textContent = serveConnectionJSON(m, version, v); }
+    else { typeInto(descriptorBox, serveDescriptorJSON(m, version, v), 8); typeInto(connBox, serveConnectionJSON(m, version, v), 8); }
+    out.innerHTML = `<strong>${escapeHtml(m.name)} ${escapeHtml(version)} is live on ${escapeHtml(v.platform)}.</strong> Served with the vLLM runtime on ${escapeHtml(v.accel)} (${v.region}) behind an OpenAI-compatible endpoint, ready for the baseline eval.`;
+    btn.disabled = false; busy = false;
+    renderRail([['Runtime', 'vLLM', 'good'], ['Accelerator', v.accel, 'good'], ['Endpoint', 'OpenAI-compatible', 'good']]);
     refreshChip();
   };
   const run = () => {
     if (busy) return; busy = true; btn.disabled = true;
     const v = SERVE_VARIANTS[pickVariant('serve-' + version, SERVE_VARIANTS.length)];
     apply(v, true); bar.style.width = '0%';
-    runSequence(els.map((li, i) => ({ ms: 460 + i * 100, li })), {
+    runSequence(els.map((li, i) => ({ ms: 420 + i * 90, li })), {
       onStep: (idx, phase, s) => {
         s.li.classList.toggle('running', phase === 'run');
         if (phase === 'done') { s.li.classList.remove('running'); s.li.classList.add('done'); }
@@ -1345,13 +1397,12 @@ function mountDeploy(card, version, label) {
     });
   };
   btn.addEventListener('click', run);
-  if (journey.served && journey.served.version === version) {
+  if (journey.served) {
     const v = SERVE_VARIANTS[_variantIdx['serve-' + version] || 0];
     apply(v, false); els.forEach(li => li.classList.add('done')); bar.style.width = '100%';
     descriptorBox.textContent = serveDescriptorJSON(m, version, v); connBox.textContent = serveConnectionJSON(m, version, v);
-    btn.textContent = 'Re-deploy';
-    out.innerHTML = `<strong>${escapeHtml(m.name)} ${escapeHtml(version)} is live on ${escapeHtml(v.platform)}.</strong> Click <b>Re-deploy</b> to roll out on a different cluster profile.`;
-  } else fx.after(280, run);
+    out.innerHTML = `<strong>${escapeHtml(m.name)} ${escapeHtml(version)} is live.</strong> Click <b>Re-deploy</b> to roll out on a different cluster profile.`;
+  } else fx.after(260, run);
 }
 
 function mountEval(card, mode) {
@@ -1541,77 +1592,64 @@ function mountEval(card, mode) {
   else fx.after(320, run);
 }
 
-/* ---- Branch steps: one map node, several selectable fixes ---- */
-function mountOptions(card, cfg) {
+function mountImprovement(card, n) {
   if (!journey.model) { card.innerHTML = needModelHTML('apply an improvement'); wireNeedModel(card); return; }
+  const cfg = IMPROVEMENTS[n.id];
+  const deep = DEEP[n.id];
   card.innerHTML = `
-    <strong>${escapeHtml(cfg.title)}</strong>
-    <p class="demo-sub">${escapeHtml(cfg.sub)}</p>
-    <div class="opt-row">${cfg.options.map((o, i) => `
-      <button class="opt-btn" data-i="${i}" type="button"><b>${escapeHtml(o.name)}</b><span>${escapeHtml(o.hint)}</span>${o.tag ? `<i>${escapeHtml(o.tag)}</i>` : ''}</button>`).join('')}
-    </div>
+    <strong>${escapeHtml(n.demoTitle || cfg.label)}</strong>
+    <p class="demo-sub">${escapeHtml(n.output || 'Apply this OpenShift AI capability to your candidate.')}</p>
     <div id="featureHost"></div>
-    <div class="delta-chips" id="optChips"></div>
-    <div id="demoOutput" class="demo-output">${journey.baseline ? 'Pick a fix above to watch it run.' : 'Run the baseline eval first, then come back and apply a fix.'}</div>`;
+    <div class="delta-chips">${Object.entries(cfg.deltas).map(([k, v]) => `<span class="delta-chip" data-k="${k}">${escapeHtml(DIM_LABEL[k])} <b>+${v}</b></span>`).join('')}</div>
+    <div id="demoOutput" class="demo-output">${journey.baseline ? 'Running…' : 'Run the baseline eval first, then apply this improvement.'}</div>
+    <button class="primary-action" id="impBtn" type="button">${n.button || 'Apply improvement'}</button>`;
   const host = card.querySelector('#featureHost');
   const out = card.querySelector('#demoOutput');
-  const chipsBox = card.querySelector('#optChips');
-  const btns = [...card.querySelectorAll('.opt-btn')];
-  const finish = (o) => {
-    recordImprovement(o.id);
+  const btn = card.querySelector('#impBtn');
+  const chips = [...card.querySelectorAll('.delta-chip')];
+  let busy = false;
+  const finish = () => {
+    recordImprovement(n.id);
+    chips.forEach(c => c.classList.add('on'));
     const proj = computeVerify();
-    chipsBox.querySelectorAll('.delta-chip').forEach(c => c.classList.add('on'));
-    out.innerHTML = `<strong>${escapeHtml(IMPROVEMENTS[o.id].label)} applied to ${escapeHtml(journey.model.name)}.</strong> Projected after re-eval: grounding ${fmtPct(proj.grounding)}, escalation ${fmtPct(proj.escalation)}, safety ${fmtPct(proj.safety)}.`;
-    renderRail(railFromMetrics(proj));
+    out.innerHTML = `<strong>Applied to ${escapeHtml(journey.model.name)}.</strong> Projected after re-eval: grounding ${fmtPct(proj.grounding)}, escalation ${fmtPct(proj.escalation)}, safety ${fmtPct(proj.safety)}.`;
+    btn.disabled = false; btn.textContent = 'Re-run'; busy = false;
+    if (proj) renderRail(railFromMetrics(proj));
     refreshChip();
   };
-  const select = (i) => {
-    if (!journey.baseline) return;
-    const o = cfg.options[i];
-    fx.clear();
-    btns.forEach((b, bi) => b.classList.toggle('selected', bi === i));
-    chipsBox.innerHTML = Object.entries(IMPROVEMENTS[o.id].deltas).map(([k, v]) =>
-      `<span class="delta-chip" data-k="${k}">${escapeHtml(DIM_LABEL[k])} <b>+${v}</b></span>`).join('');
-    out.innerHTML = 'Running\u2026';
-    o.render(host, () => finish(o));
+  const run = () => {
+    if (busy || !journey.baseline) return;
+    busy = true; btn.disabled = true;
+    chips.forEach(c => c.classList.remove('on'));
+    if (deep) deep(host, finish);
+    else fx.after(500, finish);
   };
-  btns.forEach(b => b.addEventListener('click', () => select(Number(b.dataset.i))));
-  if (journey.baseline) fx.after(300, () => select(0));
+  btn.addEventListener('click', run);
+  if (journey.baseline) fx.after(300, run);
 }
 
-function mountKnowledge(card) {
-  mountOptions(card, {
-    title: 'Ground the assistant in bank documents',
-    sub: 'Start with retrieval over the docling corpus, then pick how far to take it.',
-    options: [
-      { id: 'RAG', name: 'RAG', hint: 'Retrieve and cite the current policy', render: deepRAG },
-      { id: 'ARAG', name: 'AutoRAG', hint: 'Sweep retrieval configs against the eval', tag: 'Tech Preview', render: deepARAG },
-      { id: 'AGRAG', name: 'Agentic RAG', hint: 'The agent picks tools per step', render: DEEP.AGRAG },
-      { id: 'ALTRAG', name: 'Graph / SQL', hint: 'Structured facts join retrieval', tag: 'Industry pattern', render: DEEP.ALTRAG }
-    ]
-  });
-}
-function mountBehavior(card) {
-  mountOptions(card, {
-    title: 'Pick the lightest fix that holds',
-    sub: 'Prompts take a day. Inference-time scaling needs no retraining. Fine-tuning is durable but needs data.',
-    options: [
-      { id: 'PROMPT', name: 'Prompt engineering', hint: 'Clearer instructions and format', render: DEEP.PROMPT },
-      { id: 'ITS', name: 'Inference-time scaling', hint: 'More reasoning at runtime (its_hub)', render: renderITSPicker },
-      { id: 'TRAIN', name: 'Create data & fine-tune', hint: 'SDG Hub + Training Hub (SFT / OSFT)', render: deepTUNE }
-    ]
-  });
-}
-function mountSafety(card) {
-  mountOptions(card, {
-    title: 'Find the failures, then lock them out',
-    sub: 'Run the passes in order. Each one records its own gain.',
-    options: [
-      { id: 'REDTEAM', name: 'Red team', hint: 'Attack campaign + adversarial variants', render: DEEP.REDTEAM },
-      { id: 'GARAK', name: 'Garak probes', hint: 'Saved, repeatable safety suite', tag: 'Tech Preview', render: DEEP.GARAK },
-      { id: 'GUARD', name: 'Runtime guardrails', hint: 'TrustyAI Guardrails Orchestrator', render: DEEP.GUARD }
-    ]
-  });
+function mountRetrainDecision(card) {
+  card.innerHTML = `
+    <strong>Customization decision</strong>
+    <p class="demo-sub">Grounded context is there, but the model still fails the dispute-intake rubric. Compare the paths, then pick one on the right.</p>
+    <table class="cfg-table"><thead><tr><th>option</th><th>time</th><th>data needed</th><th>durability</th></tr></thead><tbody id="retrainRows"></tbody></table>
+    <div id="demoOutput" class="demo-output">Comparing customization paths…</div>`;
+  const body = card.querySelector('#retrainRows');
+  const out = card.querySelector('#demoOutput');
+  const rows = [
+    ['Inference-time scaling', 'minutes', 'none', 'per-call'],
+    ['Prompt fixes', 'hours', 'none', 'medium'],
+    ['Fine-tune (SFT)', 'days', '~2,000 examples', 'durable']
+  ];
+  let i = 0;
+  const add = () => {
+    if (i >= rows.length) { out.innerHTML = 'Pick a path on the right: <b>need it now</b> (inference-time scaling), <b>fix instructions</b> (prompt), or <b>adapt the model</b> (synthetic data + fine-tuning).'; return; }
+    const tr = document.createElement('tr');
+    tr.innerHTML = rows[i++].map(c => `<td>${c}</td>`).join('');
+    body.appendChild(tr);
+    fx.after(reducedMotion() ? 0 : 320, add);
+  };
+  add();
 }
 
 function mountForkRecommend(card) {
@@ -1623,7 +1661,7 @@ function mountForkRecommend(card) {
   const gaps = [
     { dim: 'grounding', label: 'Knowledge / policy grounding', node: 'RAG' },
     { dim: 'escalation', label: 'Escalation behavior', node: 'BEHAVE' },
-    { dim: 'safety', label: 'Safety / jailbreak', node: 'SAFETY' }
+    { dim: 'safety', label: 'Safety / jailbreak', node: 'REDTEAM' }
   ].map(g => ({ ...g, deficit: round1(THRESHOLDS[g.dim] - b[g.dim]) }));
   gaps.sort((a, z) => z.deficit - a.deficit);
   const top = gaps[0];
@@ -1800,7 +1838,7 @@ const DEEP = {
       ['warn', 'structured retrieval · availability: roadmap']
     ]
   ], d),
-  ITS: deepITS,
+  ITS: renderITSPicker,
   PROMPT: (h, d) => deepVariants('PROMPT', h, 'diff', [
     [
       ['ctx', 'system prompt · dispute-assistant'],
@@ -2048,40 +2086,6 @@ function deepTRAIN(host, onDone) {
   }
   streamInto(host.querySelector('#trainLog'), v.log, onDone);
 }
-function deepITS(host, onDone) {
-  const variants = [
-    {
-      claim: '“My elderly father was tricked into buying gift cards. Should we escalate this as fraud?”',
-      standard: '“This may be eligible for a dispute.”',
-      reasoning: [
-        ['in', 'pattern: gift-card purchase + third-party pressure'],
-        ['in', 'rubric: elder-fraud indicator → high risk'],
-        ['in', 'self-check: escalation warranted? yes'],
-        ['ok', '→ escalate to fraud specialist + human handoff']
-      ]
-    },
-    {
-      claim: '“I got a text from ‘the bank’ asking me to confirm a transfer, and now money is gone.”',
-      standard: '“You can file a dispute for the transfer.”',
-      reasoning: [
-        ['in', 'pattern: smishing + social-engineering signals'],
-        ['in', 'rubric: account-takeover indicator → high risk'],
-        ['in', 'self-check: freeze + escalate warranted? yes'],
-        ['ok', '→ flag account-takeover · human handoff + credential reset']
-      ]
-    }
-  ];
-  const v = variants[pickVariant('deepITS', variants.length)];
-  host.innerHTML = `
-    <div class="qa-label">High-risk claim</div>
-    <div class="qa-q">${escapeHtml(v.claim)}</div>
-    <div class="its-grid">
-      <div class="its-col"><span>Standard (fast)</span><div class="its-body">${escapeHtml(v.standard)}</div><i class="bad-i">escalation missed</i></div>
-      <div class="its-col on"><span>Extended reasoning ×4</span><div class="console" id="itsCon"></div><i class="good-i">escalation caught</i></div>
-    </div>`;
-  streamInto(host.querySelector('#itsCon'), v.reasoning, onDone);
-}
-
 /* ---- Inference-time scaling: choose a search strategy (its_hub) ----
    Faithful recreations of the four ITS algorithms (exact diagrams, "best for"
    tags, and real benchmark results), animated step by step. The chosen strategy
