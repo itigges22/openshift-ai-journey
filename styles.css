@@ -997,3 +997,28 @@ select { border: 1px solid #aaa; border-radius: 4px; padding: .6rem; background:
 }
 
 .detail-title-block .step-why b { color: #151515; }
+
+/* ---- Improvement fork: clickable gap rows + recommended rail badge ---- */
+.gap-row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.gap-row:hover { border-color: var(--rh-red); box-shadow: 0 6px 18px rgba(238,0,0,.10); }
+.gap-go { font-size: .72rem; font-weight: 900; letter-spacing: .04em; color: var(--rh-red); text-transform: uppercase; }
+.rec-badge {
+  display: block;
+  font-style: normal;
+  font-size: .62rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .3rem;
+  color: #fff;
+  opacity: .95;
+}
+.rec-badge::before { content: '★ '; }

@@ -906,8 +906,8 @@ function dominantGap() {
   const b = journey.baseline;
   if (!b) return null;
   const gaps = [
-    { dim: 'grounding', label: 'Knowledge / policy grounding', node: 'RAG' },
-    { dim: 'escalation', label: 'Escalation behavior', node: 'BEHAVE' },
+    { dim: 'grounding', label: 'Knowledge / facts', node: 'RAG' },
+    { dim: 'escalation', label: 'Behavior / skill', node: 'BEHAVE' },
     { dim: 'safety', label: 'Safety / jailbreak', node: 'REDTEAM' }
   ].map(g => ({ ...g, deficit: round1(THRESHOLDS[g.dim] - b[g.dim]) }));
   gaps.sort((a, z) => z.deficit - a.deficit);
@@ -1651,23 +1651,32 @@ function mountForkRecommend(card) {
   }
   const b = journey.baseline;
   const gaps = [
-    { dim: 'grounding', label: 'Knowledge / policy grounding', node: 'RAG' },
-    { dim: 'escalation', label: 'Escalation behavior', node: 'BEHAVE' },
-    { dim: 'safety', label: 'Safety / jailbreak', node: 'REDTEAM' }
+    { dim: 'grounding', label: 'Knowledge / facts', fix: 'Ground with RAG', node: 'RAG' },
+    { dim: 'escalation', label: 'Behavior / skill', fix: 'Fix behavior', node: 'BEHAVE' },
+    { dim: 'safety', label: 'Safety / jailbreak', fix: 'Red team the assistant', node: 'REDTEAM' }
   ].map(g => ({ ...g, deficit: round1(THRESHOLDS[g.dim] - b[g.dim]) }));
   gaps.sort((a, z) => z.deficit - a.deficit);
   const top = gaps[0];
   card.innerHTML = `
-    <strong>Routing from your baseline</strong>
-    <p class="demo-sub">EvalHub evidence points to the biggest gap. The recommended path is highlighted.</p>
+    <strong>Your baseline picks the path</strong>
+    <p class="demo-sub">Biggest gap first. Click a row to take that branch.</p>
     <div class="gap-list">
-      ${gaps.map((g, i) => `<div class="gap-row ${i === 0 ? 'top' : ''}">
+      ${gaps.map((g, i) => `<button class="gap-row ${i === 0 ? 'top' : ''}" data-target="${g.node}" type="button">
         <div class="mr-head"><span>${escapeHtml(g.label)}</span><b>${fmtPct(b[g.dim])} / ${fmtPct(THRESHOLDS[g.dim])}</b></div>
         <div class="mr-track"><div class="mr-fill" style="width:${Math.min(100, b[g.dim])}%"></div><i class="mr-th" style="left:${Math.min(100, THRESHOLDS[g.dim])}%"></i></div>
-        <div class="mr-foot"><span>${g.deficit > 0 ? `${g.deficit} below target` : 'meets target'}</span>${i === 0 ? '<span class="mr-verdict">RECOMMENDED</span>' : ''}</div>
-      </div>`).join('')}
+        <div class="mr-foot"><span>${g.deficit > 0 ? `${g.deficit} below target` : 'meets target'}</span><span class="gap-go">${i === 0 ? 'RECOMMENDED · ' : ''}Go to ${escapeHtml(g.fix)} \u2192</span></div>
+      </button>`).join('')}
     </div>
-    <div id="demoOutput" class="demo-output"><strong>Recommended: ${escapeHtml(top.label)}.</strong> Open the highlighted “${escapeHtml(shortTitle(nodesById[top.node].title))}” step to fix it.</div>`;
+    <div id="demoOutput" class="demo-output"><strong>Recommended: ${escapeHtml(top.label)}.</strong> It is furthest below your target. Click its row, or a branch on the right.</div>`;
+  card.querySelectorAll('.gap-row').forEach(r => r.addEventListener('click', () => openDetail(r.dataset.target)));
+  // Mirror the recommendation on the rail button for the same branch.
+  const railBtn = document.querySelector(`.choices .choice-button[data-target="${top.node}"]`);
+  if (railBtn && !railBtn.querySelector('.rec-badge')) {
+    const badge = document.createElement('i');
+    badge.className = 'rec-badge';
+    badge.textContent = 'Recommended';
+    railBtn.prepend(badge);
+  }
   renderRail(railFromMetrics(b));
 }
 
