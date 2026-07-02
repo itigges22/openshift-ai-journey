@@ -1649,35 +1649,42 @@ function mountForkRecommend(card) {
     card.innerHTML = `<strong>Run the baseline first</strong><p class="demo-sub">The recommended path is chosen from your baseline eval. Run the baseline step, then return here.</p>`;
     return;
   }
-  const b = journey.baseline;
+  // Route from the latest measured scores: after a flywheel lap this is the
+  // verified result including every improvement already applied.
+  const res = journey.verify || journey.baseline;
+  const lapped = !!journey.verify;
   const gaps = [
     { dim: 'grounding', label: 'Knowledge / facts', fix: 'Ground with RAG', node: 'RAG' },
     { dim: 'escalation', label: 'Behavior / skill', fix: 'Fix behavior', node: 'BEHAVE' },
     { dim: 'safety', label: 'Safety / jailbreak', fix: 'Red team the assistant', node: 'REDTEAM' }
-  ].map(g => ({ ...g, deficit: round1(THRESHOLDS[g.dim] - b[g.dim]) }));
+  ].map(g => ({ ...g, deficit: round1(THRESHOLDS[g.dim] - res[g.dim]) }));
   gaps.sort((a, z) => z.deficit - a.deficit);
   const top = gaps[0];
+  const allClear = top.deficit <= 0;
   card.innerHTML = `
-    <strong>Your baseline picks the path</strong>
-    <p class="demo-sub">Biggest gap first. Click a row to take that branch.</p>
+    <strong>${lapped ? 'Your latest eval picks the path' : 'Your baseline picks the path'}</strong>
+    <p class="demo-sub">${lapped ? 'Scores include every improvement you already applied. Biggest remaining gap first.' : 'Biggest gap first. Click a row to take that branch.'}</p>
     <div class="gap-list">
-      ${gaps.map((g, i) => `<button class="gap-row ${i === 0 ? 'top' : ''}" data-target="${g.node}" type="button">
-        <div class="mr-head"><span>${escapeHtml(g.label)}</span><b>${fmtPct(b[g.dim])} / ${fmtPct(THRESHOLDS[g.dim])}</b></div>
-        <div class="mr-track"><div class="mr-fill" style="width:${Math.min(100, b[g.dim])}%"></div><i class="mr-th" style="left:${Math.min(100, THRESHOLDS[g.dim])}%"></i></div>
-        <div class="mr-foot"><span>${g.deficit > 0 ? `${g.deficit} below target` : 'meets target'}</span><span class="gap-go">${i === 0 ? 'RECOMMENDED · ' : ''}Go to ${escapeHtml(g.fix)} \u2192</span></div>
+      ${gaps.map((g, i) => `<button class="gap-row ${i === 0 && !allClear ? 'top' : ''}" data-target="${g.node}" type="button">
+        <div class="mr-head"><span>${escapeHtml(g.label)}</span><b>${fmtPct(res[g.dim])} / ${fmtPct(THRESHOLDS[g.dim])}</b></div>
+        <div class="mr-track"><div class="mr-fill" style="width:${Math.min(100, res[g.dim])}%"></div><i class="mr-th" style="left:${Math.min(100, THRESHOLDS[g.dim])}%"></i></div>
+        <div class="mr-foot"><span>${g.deficit > 0 ? `${g.deficit} below target` : 'meets target'}</span><span class="gap-go">${i === 0 && !allClear ? 'RECOMMENDED · ' : ''}Go to ${escapeHtml(g.fix)} \u2192</span></div>
       </button>`).join('')}
     </div>
-    <div id="demoOutput" class="demo-output"><strong>Recommended: ${escapeHtml(top.label)}.</strong> It is furthest below your target. Click its row, or a branch on the right.</div>`;
+    <div id="demoOutput" class="demo-output">${allClear
+      ? '<strong>Every dimension meets your targets.</strong> Nothing left to route. Continue to verification and the launch gate.'
+      : `<strong>Recommended: ${escapeHtml(top.label)}.</strong> It is furthest below your target. Click its row, or a branch on the right.`}</div>`;
   card.querySelectorAll('.gap-row').forEach(r => r.addEventListener('click', () => openDetail(r.dataset.target)));
-  // Mirror the recommendation on the rail button for the same branch.
-  const railBtn = document.querySelector(`.choices .choice-button[data-target="${top.node}"]`);
-  if (railBtn && !railBtn.querySelector('.rec-badge')) {
-    const badge = document.createElement('i');
-    badge.className = 'rec-badge';
-    badge.textContent = 'Recommended';
-    railBtn.prepend(badge);
+  if (!allClear) {
+    const railBtn = document.querySelector(`.choices .choice-button[data-target="${top.node}"]`);
+    if (railBtn && !railBtn.querySelector('.rec-badge')) {
+      const badge = document.createElement('i');
+      badge.className = 'rec-badge';
+      badge.textContent = 'Recommended';
+      railBtn.prepend(badge);
+    }
   }
-  renderRail(railFromMetrics(b));
+  renderRail(railFromMetrics(res));
 }
 
 function mountGate(card) {
