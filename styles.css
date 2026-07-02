@@ -28,6 +28,7 @@ button:focus-visible { outline: 4px solid #73bcf7; outline-offset: 4px; }
 .landing-screen {
   display: grid;
   grid-template-rows: auto 1fr;
+  overflow-y: auto;
   background:
     radial-gradient(circle at 84% 18%, rgba(238,0,0,.24), transparent 24rem),
     linear-gradient(135deg, #151515 0%, #1f1f1f 48%, #000 100%);
@@ -43,7 +44,19 @@ button:focus-visible { outline: 4px solid #73bcf7; outline-offset: 4px; }
 .topbar { font-weight: 900; }
 .rh-logo { width: 132px; display: block; }
 .topbar span { color: #f2f2f2; }
-.landing-main { align-self: center; max-width: 900px; }
+.landing-main {
+  align-self: center;
+  justify-self: center;
+  width: min(1280px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(300px, 5fr);
+  gap: clamp(1.75rem, 4.5vw, 4.5rem);
+  align-items: center;
+  padding: 1.25rem 0;
+}
+@media (max-width: 980px) {
+  .landing-main { grid-template-columns: 1fr; }
+}
 .eyebrow {
   margin: 0 0 .7rem;
   text-transform: uppercase;
@@ -55,7 +68,7 @@ button:focus-visible { outline: 4px solid #73bcf7; outline-offset: 4px; }
 .eyebrow.red { color: #ff5555; }
 .landing-main h1 {
   margin: 0;
-  font-size: clamp(4rem, 9vw, 8.5rem);
+  font-size: clamp(3rem, 6.5vw, 6.25rem);
   line-height: .86;
   letter-spacing: -.08em;
 }
@@ -859,13 +872,26 @@ select { border: 1px solid #aaa; border-radius: 4px; padding: .6rem; background:
 }
 
 /* ---- Landing framing (scenario + what-you'll-see) ---- */
+.landing-aside {
+  background: rgba(255, 255, 255, .045);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 18px;
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+}
+.landing-aside h2 {
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-size: .78rem;
+  font-weight: 900;
+  color: #ff5555;
+}
 .landing-points {
-  max-width: 780px;
-  margin: 1.4rem 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: .6rem;
+  gap: .85rem;
 }
 .landing-points li {
   position: relative;
@@ -886,10 +912,11 @@ select { border: 1px solid #aaa; border-radius: 4px; padding: .6rem; background:
 }
 .landing-points b { color: #fff; }
 .landing-note {
-  max-width: 780px;
   margin: 1.15rem 0 0 !important;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, .12);
   color: #9aa0aa !important;
-  font-size: clamp(.9rem, 1.1vw, 1rem) !important;
+  font-size: clamp(.88rem, 1vw, .98rem) !important;
 }
 
 /* ---- Journey-map context line ---- */
