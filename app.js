@@ -1,27 +1,27 @@
-// The whole journey follows one banking scenario: a credit-card dispute assistant,
+// One banking scenario carries the whole demo: a credit card dispute assistant,
 // taken from business goal to governed production on Red Hat OpenShift AI.
-// Node copy is deliberately short — one scenario line + one "why" line per step;
-// the interactive demo in each step carries the detail.
+// Keep node copy short. One scenario line, one why line. The interactive demo
+// in each step carries the detail.
 const story = {
   nodes: [
     node('START', '1 · Business goal', 'dispute assistant + workload choice', 'shared', 0, 0, 'Intake', {
-      problem: 'The bank wants a credit-card dispute assistant: answer policy questions, collect evidence, and escalate suspected fraud — without unsafe or made-up answers.',
-      why: 'Start from a measurable business outcome, not a model. This use case needs a generative assistant and a predictive fraud model — build both here.',
+      problem: 'The bank wants an assistant that answers dispute questions, collects evidence, and flags fraud. It has to be safe enough for a regulated business.',
+      why: 'Start with a measurable business outcome. This use case needs a generative assistant plus a predictive fraud model, and you build both here.',
       demoTitle: 'Use-case intake',
       metrics: [['Manual handle time', '18 min', 'bad'], ['Launch target', '≤ 12 min', 'good'], ['Unsafe-response ceiling', '< 0.5%', 'good']],
-      output: 'Launch brief approved. Choose a workload branch on the right — the two rejoin at quality targets.',
+      output: 'Launch brief approved. Pick a workload branch on the right. The two rejoin at quality targets.',
       button: 'Create launch brief'
     }),
     node('AUTOML', 'Predictive model', 'AutoML → assistant tool · Tech Preview', 'shared', 0, 0, 'Build', {
-      problem: 'Fraud risk is a scoring problem on structured data — a classic ML model beats an LLM at it.',
-      why: 'AutoML (Tech Preview) builds the fraud scorer; Llama Stack then exposes it as a governed tool the assistant calls mid-dispute.',
+      problem: 'Fraud risk is a scoring problem on structured data. A classic ML model handles it better than an LLM.',
+      why: 'AutoML (Tech Preview) builds the fraud scorer. Llama Stack then exposes it as a tool the assistant calls during a dispute.',
       demoTitle: 'AutoML run + tool wiring',
       metrics: [['Task', 'Fraud scoring', 'good'], ['Built with', 'AutoML (TP)', 'good'], ['Exposed as', 'LLM tool', 'good']],
       output: 'The predictive model is built, served, and feeding the assistant. Rejoin the main journey.',
       button: 'Build & connect'
     }),
     node('CRIT', '2 · Set quality targets', 'EvalHub Collection', 'data', 0, 0, 'Measure', {
-      problem: 'Without a shared definition of “good,” every later improvement is a guess.',
+      problem: 'Without a shared definition of good, every later fix is a guess.',
       why: 'An EvalHub Collection turns your launch targets into repeatable checks that follow every model candidate.',
       demoTitle: 'Launch policy',
       metrics: [['Grounding target', '92%', 'good'], ['Escalation target', '95%', 'good'], ['Safety target', '99.5%', 'good']],
@@ -30,23 +30,23 @@ const story = {
     }),
     node('MODEL', '3 · Select a model', 'AI hub model catalog', 'shared', 0, 0, 'Select', {
       problem: 'You need a base model that follows instructions and fits your cost and latency budget.',
-      why: 'Pick a validated model from the catalog. Your choice is carried through serving, evaluation, improvement, and release.',
+      why: 'Pick a validated model from the AI hub catalog. Your choice carries through the rest of the journey.',
       demoTitle: 'Candidate comparison',
       metrics: [['Context window', '128k', 'good'], ['Cost / 1k chats', '$2.40', 'good'], ['Initial risk', 'Unknown', 'bad']],
       output: 'Candidate selected and recorded.',
       button: 'Select candidate'
     }),
     node('DATA', '4 · Prepare enterprise data', 'docling', 'data', 0, 0, 'Data prep', {
-      problem: 'Policy PDFs and dispute forms are useless to a model until they are clean, cited chunks.',
-      why: 'Docling converts messy bank documents into structured, PII-masked chunks — the fuel for RAG, evals, and training.',
+      problem: 'Policy PDFs and dispute forms are useless to a model until they become clean, cited chunks.',
+      why: 'Docling converts messy bank documents into structured, PII-masked chunks for retrieval, evals, and training.',
       demoTitle: 'Document conversion',
       metrics: [['Documents converted', '1,284', 'good'], ['Chunks with citations', '98%', 'good'], ['PII fields masked', '100%', 'good']],
       output: 'The policy corpus is ready for retrieval, evaluation, and training.',
       button: 'Convert documents'
     }),
     node('DEPLOY', '5 · Serve the model', 'KServe + vLLM', 'neighbor', 0, 0, 'Serve', {
-      problem: 'Every team needs to measure the same endpoint — not their own copy of the model.',
-      why: 'KServe with the vLLM runtime serves one OpenAI-compatible endpoint (llm-d when you need distributed inference).',
+      problem: 'Every team needs to measure the same endpoint, not a private copy of the model.',
+      why: 'KServe with the vLLM runtime serves one OpenAI-compatible endpoint. Use llm-d when you need distributed inference.',
       demoTitle: 'Serving endpoint',
       metrics: [['P50 latency', '1.1s', 'good'], ['P95 latency', '3.8s', 'bad'], ['Endpoint health', 'Ready', 'good']],
       output: 'The candidate is live behind an OpenAI-compatible endpoint.',
@@ -54,132 +54,69 @@ const story = {
     }),
     node('BASE', '6 · Baseline eval', 'EvalHub diagnosis', 'data', 0, 0, 'Measure', {
       problem: 'The assistant sounds fluent. The baseline shows where it actually fails.',
-      why: 'One eval run diagnoses whether the gap is knowledge, behavior, or safety — so you fix the right thing first.',
+      why: 'One eval run tells you whether the gap is knowledge, behavior, or safety, so you fix the right thing first.',
       demoTitle: 'Baseline result',
       metrics: [['Policy grounded', '71%', 'bad'], ['Escalation recall', '82%', 'bad'], ['Safety pass', '97.8%', 'bad']],
-      output: 'Baseline complete — the failures now route the journey.',
+      output: 'Baseline complete. The failures now route the journey.',
       button: 'Run baseline eval'
     }),
     node('FORK', '7 · Choose the improvement path', 'route by evidence', 'decision', 0, 0, 'Decide', {
-      problem: 'Three gaps, one team. Evidence picks the first fix — not preference.',
-      why: 'Missing knowledge → connect data. Wrong behavior → customize the model. Unsafe → harden it. The baseline tells you which.',
+      problem: 'Three gaps, one team. Let the evidence pick the first fix.',
+      why: 'Missing knowledge points to RAG. Wrong behavior points to customization. Safety failures point to hardening. The baseline tells you which.',
       demoTitle: 'Failure router',
       output: 'Pick the branch that matches your biggest gap.',
       button: 'Route failure'
     }),
-    node('RAG', 'Ground with RAG', 'retrieval + citations', 'data', 0, 0, 'Improve', {
-      problem: 'The policy answers already exist in bank documents — the model just cannot cite them.',
-      why: 'RAG grounds answers in your prepared documents, with citations — then choose how far to optimize retrieval.',
-      demoTitle: 'Grounded answer comparison',
+    node('RAG', 'Connect the data', 'RAG · AutoRAG · agents', 'data', 0, 0, 'Improve', {
+      problem: 'The policy answers already exist in bank documents. The model just cannot cite them.',
+      why: 'Ground answers in your prepared documents, then pick how far to take retrieval: automated tuning, an agent that chooses tools, or structured data.',
+      demoTitle: 'Grounding options',
       metrics: [['Grounded answers', '71% → 89%', 'good'], ['Citation coverage', '42% → 96%', 'good'], ['Stale answers', '18% → 4%', 'good']],
       output: 'Answers now cite the current policy section instead of guessing.',
       button: 'Attach retrieval context'
     }),
-    node('ARAG', 'AutoRAG', 'automated tuning · Tech Preview', 'data', 0, 0, 'Optimize', {
-      problem: 'Hand-tuning chunk sizes, retrievers, and rerankers takes days and still misses.',
-      why: 'AutoRAG (Tech Preview) sweeps retrieval configurations and keeps the one that best clears your eval collection.',
-      demoTitle: 'AutoRAG experiment board',
-      metrics: [['Configs tested', '36', 'good'], ['Best grounded score', '94%', 'good'], ['Latency delta', '+180ms', 'good']],
-      output: 'Best retrieval pipeline selected against the same collection.',
-      button: 'Run AutoRAG sweep'
-    }),
-    node('AGRAG', 'Agentic RAG', 'retrieval + tools on demand', 'data', 0, 0, 'Optimize', {
-      problem: 'Not every question needs retrieval — some need a tool call or a follow-up question first.',
-      why: 'The agent decides per step: retrieve policy, call the fraud-risk tool, or ask the customer for what is missing.',
-      demoTitle: 'Tool-choice trace',
-      metrics: [['Correct tool choice', '91%', 'good'], ['Unneeded retrieval', '↓ 38%', 'good'], ['Clarifying questions', '+22%', 'good']],
-      output: 'The assistant retrieves only when needed — and uses the predictive fraud score as a tool.',
-      button: 'Inspect agent trace'
-    }),
-    node('ALTRAG', 'Graph / SQL retrieval', 'industry pattern', 'data roadmap', 0, 0, 'Pattern', {
-      problem: 'Some answers live in relationships — account status, merchant, claim history — not in policy text.',
-      why: 'Not a named OpenShift AI feature — an industry pattern you can build on the platform when structured facts drive the answer.',
-      demoTitle: 'Structured retrieval preview',
-      metrics: [['Structured facts joined', '4', 'good'], ['Manual lookup avoided', 'Yes', 'good'], ['Availability', 'Build-your-own', 'bad']],
-      output: 'Structured banking facts join the retrieval layer for relationship-heavy questions.',
-      button: 'Preview structured context'
-    }),
-    node('QRETRAIN', 'Fix behavior', 'lightest fix that holds', 'decision', 0, 0, 'Decide', {
+    node('BEHAVE', 'Fix behavior', 'prompts · its_hub · fine-tuning', 'data', 0, 0, 'Improve', {
       problem: 'The model has the facts but still misses escalations and asks poor follow-up questions.',
-      why: 'Pick the lightest fix that holds: more reasoning at runtime, better instructions, or fine-tuning with data.',
-      demoTitle: 'Customization decision',
-      output: 'Compare time, data needed, and durability — then pick a path.',
-      button: 'Choose behavior fix'
+      why: 'Pick the lightest fix that holds. Add reasoning at runtime, rewrite the instructions, or fine-tune on new data.',
+      demoTitle: 'Behavior fixes',
+      metrics: [['Escalation recall', '82% → 96%', 'good'], ['Format compliance', '76% → 96%', 'good'], ['Overconfident claims', '14% → 3%', 'good']],
+      output: 'The assistant asks for what it needs and escalates when it should.',
+      button: 'Apply behavior fix'
     }),
-    node('ITS', 'Inference-time scaling', 'its_hub', 'data', 0, 0, 'Improve', {
-      problem: 'You cannot retrain before the pilot, but high-risk claims need better reasoning today.',
-      why: 'Spend extra compute at inference on the cases that need it — pick a strategy from its_hub, no retraining.',
-      demoTitle: 'Strategy chooser',
-      metrics: [['Escalation recall', '82% → 91%', 'good'], ['P95 latency', '3.8s → 5.6s', 'bad'], ['Applied to', 'High risk only', 'good']],
-      output: 'More reasoning budget, only on claims likely to need escalation.',
-      button: 'Apply inference-time scaling'
-    }),
-    node('PROMPT', 'Prompt engineering', 'instructions & format', 'data', 0, 0, 'Improve', {
-      problem: 'Right facts, wrong delivery — answers sound final while disputes are still under investigation.',
-      why: 'Clearer instructions and output format are the fastest behavior fix when the knowledge is already there.',
-      demoTitle: 'Prompt diff',
-      metrics: [['Format compliance', '76% → 96%', 'good'], ['Overconfident claims', '14% → 3%', 'good'], ['Engineering time', '1 day', 'good']],
-      output: 'Responses now cite policy, ask for the transaction date, and hand off suspected fraud.',
-      button: 'Apply prompt patch'
-    }),
-    node('TRAIN', 'Create data & fine-tune', 'SDG Hub + Training Hub', 'data', 0, 0, 'Adapt', {
-      problem: 'Durable behavior change needs ~2,000 good examples. The bank has 420.',
-      why: 'SDG Hub generates the missing examples from observed failures; Training Hub fine-tunes the model on them (SFT / OSFT).',
-      demoTitle: 'Synthetic data + fine-tuning run',
-      metrics: [['Labeled examples', '420 → 2,170', 'good'], ['Escalation recall', '82% → 96%', 'good'], ['Regression alerts', '2', 'bad']],
-      output: 'A tuned candidate is ready to verify against the same collection.',
-      button: 'Generate data & train'
-    }),
-    node('REDTEAM', 'Red team the assistant', 'attacks + adversarial data', 'data', 0, 0, 'Probe', {
+    node('SAFETY', 'Harden safety', 'red team · Garak · guardrails', 'data', 0, 0, 'Protect', {
       problem: 'Attackers will not use your test prompts. Find the failures before customers do.',
-      why: 'A red-team campaign finds the jailbreaks; SDG Hub expands each finding into whole families of attack variants.',
-      demoTitle: 'Attack campaign',
-      metrics: [['Attack prompts', '320', 'good'], ['Successful jailbreaks', '7.2%', 'bad'], ['High-severity findings', '11', 'bad']],
-      output: 'Findings become repeatable adversarial test data, not a one-off spreadsheet.',
-      button: 'Launch red-team campaign'
-    }),
-    node('GARAK', 'Garak safety probes', 'repeatable scanning · Tech Preview', 'data', 0, 0, 'Probe', {
-      problem: 'One-off findings go stale. Safety needs a regression suite that runs on every candidate.',
-      why: 'Garak (the red-teaming harness in OpenShift AI, Tech Preview) turns safety testing into a saved, repeatable probe suite.',
-      demoTitle: 'Probe results',
-      metrics: [['Probe pass rate', '97.8% → 99.6%', 'good'], ['Critical failures', '3 → 0', 'good'], ['Regression suite', 'Saved', 'good']],
-      output: 'The candidate passes the saved probe suite; residual risks are recorded.',
-      button: 'Run Garak probes'
-    }),
-    node('GUARD', 'Runtime guardrails', 'TrustyAI Guardrails Orchestrator', 'neighbor', 0, 0, 'Protect', {
-      problem: 'Even a safer model needs a runtime backstop for PII, unsafe advice, and required handoffs.',
-      why: 'The TrustyAI Guardrails Orchestrator screens traffic at runtime with detectors like Granite Guardian (NeMo Guardrails is also supported).',
-      demoTitle: 'Guardrail verdicts',
-      metrics: [['Unsafe blocked', '99.7%', 'good'], ['False blocks', '1.8%', 'good'], ['Human handoffs', '+12%', 'good']],
-      output: 'Unsafe requests are blocked or routed to a human fraud specialist.',
-      button: 'Test guardrails'
+      why: 'Red team the assistant, turn the findings into a repeatable probe suite, and add runtime guardrails as a backstop.',
+      demoTitle: 'Safety hardening',
+      metrics: [['Successful jailbreaks', '7.2% → 0.4%', 'good'], ['Probe pass rate', '99.6%', 'good'], ['Unsafe blocked at runtime', '99.7%', 'good']],
+      output: 'Findings become repeatable tests, and unsafe requests are blocked or handed to a person.',
+      button: 'Run safety pass'
     }),
     node('VERIFY', '8 · Re-serve & verify', 'v2 + the same EvalHub run', 'data', 0, 0, 'Measure', {
-      problem: 'Did the fix work — without breaking anything else?',
-      why: 'Serve the improved v2 behind the same endpoint, re-run the exact same collection, and read the before/after honestly.',
+      problem: 'Did the fix work? Did it break anything else?',
+      why: 'The improved v2 rolls out behind the same endpoint and the exact same collection runs again. Same checks, same thresholds.',
       demoTitle: 'Verification report',
       metrics: [['Policy grounded', '94%', 'good'], ['Escalation recall', '96%', 'good'], ['Safety pass', '99.6%', 'good']],
-      output: 'Before/after measured with the same checks — no moved goalposts.',
+      output: 'Before and after, measured with the same checks.',
       button: 'Re-run collection'
     }),
     node('GATE', '9 · Ready for production?', 'launch gate', 'decision', 0, 0, 'Decide', {
-      problem: 'Ship, or loop the failures back into data?',
-      why: 'The gate checks verified numbers against your launch policy — pass ships to governance, fail feeds the flywheel.',
+      problem: 'Ship it, or send the failures back into the data loop?',
+      why: 'The gate checks your verified numbers against the launch policy. Pass ships to governance. Fail feeds the flywheel.',
       demoTitle: 'Threshold gate',
       output: 'Tune the thresholds and watch the candidate ship or loop back.',
       button: 'Evaluate gate'
     }),
     node('T2D', 'Trace-to-Dataset', 'feedback flywheel', 'data', 0, 0, 'Learn', {
-      problem: 'A failure just taught you something. Do not waste it.',
-      why: 'Failed traces become new eval and training data, and the loop returns to the improvement decision — that is the flywheel.',
+      problem: 'A failure just taught you something. Keep it.',
+      why: 'Failed traces become new eval and training data, and the loop returns to the improvement decision.',
       demoTitle: 'Trace conversion',
       metrics: [['Traces reviewed', '48', 'good'], ['New eval items', '31', 'good'], ['New training candidates', '17', 'good']],
       output: 'The failure is now reusable data. Loop back to the improvement decision.',
       button: 'Convert trace to dataset'
     }),
     node('GOV', '10 · Govern & ship', 'registry, audit → Responses API', 'shared', 0, 0, 'Ship', {
-      problem: 'A regulated bank cannot ship on vibes — it needs lineage, approvals, and a rollback plan.',
-      why: 'Governance bundles the evidence; the production app then calls the assistant through the OpenAI-compatible Responses API (Llama Stack).',
+      problem: 'A regulated bank needs lineage, approvals, and a rollback plan before anything goes live.',
+      why: 'Governance bundles the evidence. The production app then calls the assistant through the OpenAI-compatible Responses API.',
       demoTitle: 'Release bundle + production call',
       metrics: [['Approvals', '4/4', 'good'], ['Audit artifacts', 'Complete', 'good'], ['API', 'OpenAI-compatible', 'good']],
       output: 'Approved, audited, and live in the dispute workflow.',
@@ -190,12 +127,9 @@ const story = {
     edge('START', 'CRIT', 'generative assistant'), edge('START', 'AUTOML', 'predictive model'),
     edge('AUTOML', 'CRIT', 'feeds the assistant'),
     edge('CRIT', 'MODEL'), edge('MODEL', 'DATA'), edge('DATA', 'DEPLOY'), edge('DEPLOY', 'BASE'), edge('BASE', 'FORK'),
-    edge('FORK', 'RAG', 'knowledge / facts'), edge('FORK', 'QRETRAIN', 'behavior / skill'), edge('FORK', 'REDTEAM', 'safety / jailbreak'),
-    edge('RAG', 'ARAG', 'automate tuning'), edge('RAG', 'AGRAG', 'agent decides'), edge('RAG', 'ALTRAG', 'structured data'), edge('RAG', 'VERIFY', 'good enough'),
-    edge('QRETRAIN', 'ITS', 'need it now'), edge('QRETRAIN', 'PROMPT', 'fix instructions'), edge('QRETRAIN', 'TRAIN', 'adapt the model'),
-    edge('REDTEAM', 'GARAK'), edge('GARAK', 'GUARD'),
-    edge('ARAG', 'VERIFY'), edge('AGRAG', 'VERIFY'), edge('ALTRAG', 'VERIFY', 'pattern', true), edge('ITS', 'VERIFY'), edge('PROMPT', 'VERIFY'), edge('TRAIN', 'VERIFY'), edge('GUARD', 'VERIFY'),
-    edge('VERIFY', 'GATE'), edge('GATE', 'T2D', 'no — loop back'), edge('T2D', 'FORK', 'feedback flywheel'), edge('GATE', 'GOV', 'yes — ship')
+    edge('FORK', 'RAG', 'knowledge / facts'), edge('FORK', 'BEHAVE', 'behavior / skill'), edge('FORK', 'SAFETY', 'safety / jailbreak'),
+    edge('RAG', 'VERIFY'), edge('BEHAVE', 'VERIFY'), edge('SAFETY', 'VERIFY'),
+    edge('VERIFY', 'GATE'), edge('GATE', 'T2D', 'no, loop back'), edge('T2D', 'FORK', 'feedback flywheel'), edge('GATE', 'GOV', 'yes, ship')
   ]
 };
 
@@ -260,16 +194,8 @@ const LAB_LINKS = {
   BASE: ['4-ready-to-scale-201/1-evaluate-genai-applications', 'GenAI evaluation'],
   FORK: ['6-observability/5-feedback-loops', 'feedback loops'],
   RAG: ['5-grounded-ai/1-intro-to-rag', 'building RAG'],
-  ARAG: ['5-grounded-ai/8-rag-evals', 'evaluating RAG'],
-  AGRAG: ['8-agents/2-agentic-workflows', 'agentic workflows'],
-  ALTRAG: ['5-grounded-ai/3-vector-databases', 'vector stores'],
-  QRETRAIN: ['12-fine-tuning/1-fine-tune-a-model', 'fine-tuning a model'],
-  ITS: ['10-model-optimization/', 'model optimization'],
-  PROMPT: ['2-linguistics/1-prompt-engineering', 'prompt engineering'],
-  TRAIN: ['12-fine-tuning/1-fine-tune-a-model', 'fine-tuning a model'],
-  REDTEAM: ['7-honor-code/1-guardrails', 'guardrails & safety'],
-  GARAK: ['7-honor-code/4-automate-checks', 'automating safety checks'],
-  GUARD: ['7-honor-code/2-nemo-guardrails', 'runtime guardrails'],
+  BEHAVE: ['12-fine-tuning/1-fine-tune-a-model', 'fine-tuning a model'],
+  SAFETY: ['7-honor-code/1-guardrails', 'guardrails & safety'],
   VERIFY: ['4-ready-to-scale-201/1-evaluate-genai-applications', 'GenAI evaluation'],
   GATE: ['6-observability/2-metrics', 'production metrics'],
   T2D: ['6-observability/5-feedback-loops', 'feedback loops'],
@@ -277,7 +203,7 @@ const LAB_LINKS = {
 };
 function labLinkHTML(n) {
   const [path, topic] = LAB_LINKS[n.id] || ['', 'the platform'];
-  return `<a href="${LAB_BASE + path}" target="_blank" rel="noopener">Go deeper — try ${escapeHtml(topic)} hands-on in <strong>AIGenOps 501</strong> ↗</a>`;
+  return `<a href="${LAB_BASE + path}" target="_blank" rel="noopener">Go deeper: try ${escapeHtml(topic)} hands-on in <strong>AIGenOps 501</strong> ↗</a>`;
 }
 
 function crumbHTML(id, current) {
@@ -490,23 +416,9 @@ function clampPan() {
   view.ty = ch <= h ? (h - ch) / 2 : clamp(view.ty, h - ch - pad, pad);
 }
 
-// Default: readable scale, fit to width, anchored at the top so the journey
-// reads top-to-bottom as the user scrolls/pans down.
-function fitView() {
-  if (!layout) return;
-  const { w, h } = viewportSize();
-  if (!w || !h) return;
-  // Zoom in a bit past a plain fit-to-width: the guided view re-centres on the
-  // active step, so the wider decision rows can spill off-screen comfortably.
-  view.scale = clamp((w - 48) / layout.width * 1.18, 0.55, 1.05);
-  view.tx = (w - layout.width * view.scale) / 2;
-  view.ty = 28;
-  clampPan();
-  applyView();
-}
-
-// Smoothly re-center the map on the current tip + the next clickable steps so the
-// user is never hunting for where the highlighted steps went.
+// Center the view on the current step plus the next clickable steps. The map
+// opens zoomed in on the first step; the user pans with the trackpad and zooms
+// only with the corner buttons.
 let animTimer = null;
 function animateView() {
   graphCanvas.style.transition = 'transform .55s cubic-bezier(.4,0,.2,1)';
@@ -514,7 +426,7 @@ function animateView() {
   if (animTimer) clearTimeout(animTimer);
   animTimer = setTimeout(() => { graphCanvas.style.transition = ''; animTimer = null; }, 620);
 }
-function focusFrontier() {
+function centerOnFrontier(animate) {
   if (!layout) return;
   const tip = state.path[state.path.length - 1];
   const ids = new Set(frontierSet());
@@ -523,13 +435,35 @@ function focusFrontier() {
   if (!pts.length) { applyView(); return; }
   const xs = pts.map(p => p.x);
   const ys = pts.map(p => p.y);
-  const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
-  const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  const minX = Math.min(...xs) - NODE_W / 2, maxX = Math.max(...xs) + NODE_W / 2;
+  const minY = Math.min(...ys) - NODE_H / 2, maxY = Math.max(...ys) + NODE_H / 2;
   const { w, h } = viewportSize();
-  view.tx = w / 2 - cx * view.scale;
-  view.ty = h / 2 - cy * view.scale;
+  if (!w || !h) return;
+  // Zoom out only when the active steps do not fit at the current zoom.
+  const fitScale = Math.min((w - 140) / (maxX - minX), (h - 140) / (maxY - minY));
+  view.scale = clamp(Math.min(view.scale, fitScale), view.min, view.max);
+  view.tx = w / 2 - ((minX + maxX) / 2) * view.scale;
+  view.ty = h / 2 - ((minY + maxY) / 2) * view.scale;
   clampPan();
-  animateView();
+  if (animate) animateView(); else applyView();
+}
+function fitView() {
+  view.scale = 1;
+  centerOnFrontier(false);
+}
+function focusFrontier() {
+  centerOnFrontier(true);
+}
+// Whole-map overview, used by the corner expand button.
+function fitAll() {
+  if (!layout) return;
+  const { w, h } = viewportSize();
+  if (!w || !h) return;
+  view.scale = clamp(Math.min((w - 48) / layout.width, (h - 48) / layout.height), view.min, view.max);
+  view.tx = (w - layout.width * view.scale) / 2;
+  view.ty = (h - layout.height * view.scale) / 2;
+  clampPan();
+  applyView();
 }
 
 function zoomAt(factor, cx, cy) {
@@ -543,11 +477,15 @@ function zoomAt(factor, cx, cy) {
 }
 
 function initPanZoom() {
+  // Trackpad and scroll wheel pan the map; zoom is on the corner buttons only.
   graphViewport.addEventListener('wheel', (ev) => {
     ev.preventDefault();
+    if (ev.ctrlKey) return; // swallow pinch gestures instead of zooming
     graphCanvas.style.transition = '';
-    const r = graphViewport.getBoundingClientRect();
-    zoomAt(ev.deltaY < 0 ? 1.12 : 1 / 1.12, ev.clientX - r.left, ev.clientY - r.top);
+    view.tx -= ev.deltaX;
+    view.ty -= ev.deltaY;
+    clampPan();
+    applyView();
   }, { passive: false });
 
   graphViewport.addEventListener('pointerdown', (ev) => {
@@ -591,7 +529,7 @@ function initPanZoom() {
   // Double-click empty canvas to reset back to the default framing.
   graphViewport.addEventListener('dblclick', (ev) => {
     if (ev.target.closest('.graph-node')) return;
-    fitView();
+    focusFrontier();
   });
   window.addEventListener('resize', () => { clampPan(); applyView(); });
 
@@ -610,7 +548,7 @@ function initPanZoom() {
   const zoomResetBtn = document.querySelector('#zoomReset');
   if (zoomInBtn) zoomInBtn.addEventListener('click', () => zoomStep(1.25));
   if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => zoomStep(1 / 1.25));
-  if (zoomResetBtn) zoomResetBtn.addEventListener('click', () => { graphCanvas.style.transition = 'transform .25s ease'; fitView(); setTimeout(() => { graphCanvas.style.transition = ''; }, 260); });
+  if (zoomResetBtn) zoomResetBtn.addEventListener('click', () => { graphCanvas.style.transition = 'transform .25s ease'; fitAll(); setTimeout(() => { graphCanvas.style.transition = ''; }, 260); });
 }
 
 function renderDetail() {
@@ -894,8 +832,8 @@ function dominantGap() {
   if (!b) return null;
   const gaps = [
     { dim: 'grounding', label: 'Knowledge / policy grounding', node: 'RAG' },
-    { dim: 'escalation', label: 'Escalation behavior', node: 'QRETRAIN' },
-    { dim: 'safety', label: 'Safety / jailbreak', node: 'REDTEAM' }
+    { dim: 'escalation', label: 'Escalation behavior', node: 'BEHAVE' },
+    { dim: 'safety', label: 'Safety / jailbreak', node: 'SAFETY' }
   ].map(g => ({ ...g, deficit: round1(THRESHOLDS[g.dim] - b[g.dim]) }));
   gaps.sort((a, z) => z.deficit - a.deficit);
   return gaps[0];
@@ -948,7 +886,7 @@ function runSequence(steps, { onStep, onDone } = {}) {
 /* ---- Continuity chip shown on every detail view ---- */
 function journeyChipHTML() {
   if (!journey.model) {
-    return '<div id="journeyChip" class="journey-chip empty"><i class="jc-dot"></i>No candidate yet — start at “Select a model”.</div>';
+    return '<div id="journeyChip" class="journey-chip empty"><i class="jc-dot"></i>No candidate yet. Start at “Select a model”.</div>';
   }
   const m = journey.model;
   const res = journey.verify || journey.baseline;
@@ -991,12 +929,11 @@ function mountExperience(n) {
     case 'BASE': return mountEval(card, 'baseline');
     case 'VERIFY': return mountEval(card, 'verify');
     case 'FORK': return mountForkRecommend(card);
-    case 'QRETRAIN': return mountRetrainDecision(card);
-    case 'ITS': return mountITS(card);
+    case 'RAG': return mountKnowledge(card);
+    case 'BEHAVE': return mountBehavior(card);
+    case 'SAFETY': return mountSafety(card);
     case 'GATE': return mountGate(card);
     case 'GOV': return mountShip(card);
-    default:
-      if (IMPROVEMENTS[n.id]) return mountImprovement(card, n);
   }
 }
 
@@ -1022,10 +959,10 @@ function mountLaunchBrief(card) {
     ['Human handoff', 'Hand off to a person whenever risk policy requires it.']
   ];
   card.innerHTML = `
-    <strong>Use-case intake — credit-card dispute assistant</strong>
+    <strong>Use-case intake: credit card dispute assistant</strong>
     <p class="demo-sub">Start from the business outcome, then connect OpenShift AI around it. This brief drives every later step.</p>
     <div class="brief-label">Assistant scope</div>
-    <ul class="run-steps" id="scopeSteps">${scope.map(s => `<li><i class="dot"></i><span><b>${escapeHtml(s[0])}</b> — ${escapeHtml(s[1])}</span></li>`).join('')}</ul>
+    <ul class="run-steps" id="scopeSteps">${scope.map(s => `<li><i class="dot"></i><span><b>${escapeHtml(s[0])}</b>: ${escapeHtml(s[1])}</span></li>`).join('')}</ul>
     <div class="brief-label">Launch targets</div>
     <div class="brief-targets">
       <div class="brief-goal"><span>Avg handle time</span><b id="bg-t">18 min</b><i>down from 18 min today</i></div>
@@ -1057,7 +994,7 @@ function mountLaunchBrief(card) {
       },
       onDone: () => {
         animateTargets();
-        out.innerHTML = '<strong>Launch brief approved.</strong> These targets drive every later step. Now pick a workload branch on the right — generative assistant or predictive fraud model.';
+        out.innerHTML = '<strong>Launch brief approved.</strong> These targets drive every later step. Now pick a workload branch on the right: generative assistant or predictive fraud model.';
         btn.disabled = false; btn.textContent = 'Re-run brief'; busy = false;
       }
     });
@@ -1196,7 +1133,7 @@ function mountCollection(card) {
   const checks = currentChecks();
   card.innerHTML = `
     <strong>Set your launch policy</strong>
-    <p class="demo-sub"><b>You decide the bar.</b> Drag each threshold to set your launch policy — the same collection then scores every candidate, from baseline to launch gate.</p>
+    <p class="demo-sub"><b>You decide the bar.</b> Drag each threshold to set your launch policy. The same collection scores every candidate, from baseline to launch gate.</p>
     <div id="critKnobs"></div>
     <div class="cl-summary">
       <span class="cl-label">Collection checks</span>
@@ -1211,7 +1148,7 @@ function mountCollection(card) {
     onChange: (d) => {
       const row = rows.find(r => r.dataset.dim === d);
       if (row) { const v = row.querySelector('.suite-val'); v.textContent = `≥ ${fmtThresh(d, THRESHOLDS[d])}`; }
-      out.innerHTML = `Collection <code>dispute-quality-v1</code> updated — grounding ≥ ${fmtThresh('grounding', THRESHOLDS.grounding)}, escalation ≥ ${fmtThresh('escalation', THRESHOLDS.escalation)}, safety ≥ ${fmtThresh('safety', THRESHOLDS.safety)}. Every candidate is now measured against your policy.`;
+      out.innerHTML = `Collection <code>dispute-quality-v1</code> updated: grounding ≥ ${fmtThresh('grounding', THRESHOLDS.grounding)}, escalation ≥ ${fmtThresh('escalation', THRESHOLDS.escalation)}, safety ≥ ${fmtThresh('safety', THRESHOLDS.safety)}. Every candidate is now measured against your policy.`;
     }
   });
   card.querySelector('#viewBriefBtn').addEventListener('click', () => openDocModal(collectionBriefHTML(currentChecks())));
@@ -1221,7 +1158,7 @@ function launchBriefHTML() {
   return `
     <div class="doc-head">
       <div class="doc-brand"><span class="doc-logo">Red Hat OpenShift AI</span><span class="doc-kicker">AI Use-Case Brief</span></div>
-      <h2 class="doc-title">Credit-Card Dispute Assistant — Project Charter</h2>
+      <h2 class="doc-title">Credit Card Dispute Assistant: Project Charter</h2>
       <div class="doc-meta">
         <span><i>Use case</i>Dispute support &amp; risk ops</span>
         <span><i>Sponsor</i>Chief Digital Banking Officer</span>
@@ -1237,7 +1174,7 @@ function launchBriefHTML() {
         <li>Fraud-signal detection with escalation to a human specialist.</li>
         <li>Human handoff for high-risk and suspected identity-theft claims.</li>
       </ul></section>
-      <section><h3>3 · Out of scope — v1</h3><ul class="doc-list">
+      <section><h3>3 · Out of scope for v1</h3><ul class="doc-list">
         <li>Autonomous chargeback approval or denial.</li>
         <li>Final liability determinations while a dispute is open.</li>
         <li>Servicing of non-card products.</li>
@@ -1252,7 +1189,7 @@ function launchBriefHTML() {
         </tbody></table>
       </section>
       <section><h3>5 · Constraints &amp; risks</h3><ul class="doc-list">
-        <li>Regulated environment — every claim must cite the controlling policy.</li>
+        <li>Regulated environment: every claim must cite the controlling policy.</li>
         <li>PII must never be exposed; account number and SSN masked end to end.</li>
         <li>Cost and latency must stay within call-center SLAs.</li>
       </ul></section>
@@ -1264,7 +1201,7 @@ function collectionBriefHTML(checks) {
   return `
     <div class="doc-head">
       <div class="doc-brand"><span class="doc-logo">Red Hat OpenShift AI</span><span class="doc-kicker">EvalHub Collection Specification</span></div>
-      <h2 class="doc-title">Dispute Assistant — Quality Target Brief</h2>
+      <h2 class="doc-title">Dispute Assistant: Quality Target Brief</h2>
       <div class="doc-meta">
         <span><i>Collection ID</i>dispute-quality-v1</span>
         <span><i>Owner</i>AI Evaluation Lead</span>
@@ -1274,7 +1211,7 @@ function collectionBriefHTML(checks) {
     </div>
     <div class="doc-body">
       <section><h3>1 · Use case</h3><p>Credit-card dispute support and risk-operations assistant for retail banking. Answers policy questions, collects dispute evidence, escalates suspected fraud, and hands high-risk claims to a human specialist. Operates in English and Spanish.</p></section>
-      <section><h3>2 · Success criteria — launch gates</h3>
+      <section><h3>2 · Success criteria (launch gates)</h3>
         <table class="doc-table"><thead><tr><th>Check</th><th>Target</th><th>Severity</th></tr></thead>
         <tbody>${checks.map(c => `<tr><td>${escapeHtml(c[0])}</td><td>${escapeHtml(c[1])}</td><td>${escapeHtml(c[2])}</td></tr>`).join('')}</tbody></table>
         <p class="doc-note">Blocker checks must pass before production. The same collection runs at baseline and at every verification so before/after results stay comparable.</p>
@@ -1349,7 +1286,7 @@ function mountDeploy(card, version, label) {
   if (!journey.model) { card.innerHTML = needModelHTML('serve a model'); wireNeedModel(card); return; }
   const m = journey.model;
   card.innerHTML = `
-    <strong>Serve ${escapeHtml(m.name)} — ${escapeHtml(version)}</strong>
+    <strong>Serve ${escapeHtml(m.name)} · ${escapeHtml(version)}</strong>
     <p class="demo-sub">Serve the ${escapeHtml(label)} on <b>KServe with the vLLM runtime</b> (you could also use a KServe RawDeployment or llm-d) behind one OpenAI-compatible endpoint.</p>
     <div class="run-progress"><div class="run-bar" id="depBar"></div></div>
     <ul class="run-steps" id="depSteps"></ul>
@@ -1433,8 +1370,8 @@ function mountEval(card, mode) {
     { label: 'Spanish consistency' }
   ];
   card.innerHTML = `
-    <strong>${escapeHtml(isVerify ? `Re-serve v2 & re-run EvalHub — ${m.name}` : `Baseline EvalHub — ${m.name}`)}</strong>
-    <p class="demo-sub">${isVerify ? 'The improved candidate rolls out as v2 behind the same endpoint, then the same collection re-runs — same checks, same thresholds.' : 'The reusable collection runs against your candidate to find where it fails.'}</p>
+    <strong>${escapeHtml(isVerify ? `Re-serve v2 & re-run EvalHub · ${m.name}` : `Baseline EvalHub · ${m.name}`)}</strong>
+    <p class="demo-sub">${isVerify ? 'The improved candidate rolls out as v2 behind the same endpoint, then the same collection runs again. Same checks, same thresholds.' : 'The reusable collection runs against your candidate to find where it fails.'}</p>
     <div class="run-progress"><div class="run-bar" id="evBar"></div></div>
     <ul class="run-steps" id="evSuites">${suites.map(s => `<li><i class="dot"></i><span>${escapeHtml(s.label)}</span><b class="suite-val"></b></li>`).join('')}</ul>
     <div id="evConsole"></div>
@@ -1563,9 +1500,9 @@ function mountEval(card, mode) {
         }
       }
       const prevNote = journey.prevVerify
-        ? ` The model improved again this lap — grounding ${fmtD(res.grounding - journey.prevVerify.grounding)}, escalation ${fmtD(res.escalation - journey.prevVerify.escalation)}, safety ${fmtD(res.safety - journey.prevVerify.safety)} vs your last pass.`
+        ? ` The model improved again this lap: grounding ${fmtD(res.grounding - journey.prevVerify.grounding)}, escalation ${fmtD(res.escalation - journey.prevVerify.escalation)}, safety ${fmtD(res.safety - journey.prevVerify.safety)} vs your last pass.`
         : '';
-      out.innerHTML = `<strong>Verification complete — ${passCount}/3 thresholds cleared.</strong>${prevNote} Total lift vs baseline: grounding ${fmtD(res.grounding - journey.baseline.grounding)}, escalation ${fmtD(res.escalation - journey.baseline.escalation)}, safety ${fmtD(res.safety - journey.baseline.safety)}.`;
+      out.innerHTML = `<strong>Verification complete: ${passCount}/3 thresholds cleared.</strong>${prevNote} Total lift vs baseline: grounding ${fmtD(res.grounding - journey.baseline.grounding)}, escalation ${fmtD(res.escalation - journey.baseline.escalation)}, safety ${fmtD(res.safety - journey.baseline.safety)}.`;
     } else {
       const g = dominantGap();
       out.innerHTML = `<strong>Baseline complete.</strong> Biggest gap: <b>${escapeHtml(g.label)}</b> (${fmtPct(journey.baseline[g.dim])} vs ${fmtPct(THRESHOLDS[g.dim])} target).`;
@@ -1604,40 +1541,77 @@ function mountEval(card, mode) {
   else fx.after(320, run);
 }
 
-function mountImprovement(card, n) {
+/* ---- Branch steps: one map node, several selectable fixes ---- */
+function mountOptions(card, cfg) {
   if (!journey.model) { card.innerHTML = needModelHTML('apply an improvement'); wireNeedModel(card); return; }
-  const cfg = IMPROVEMENTS[n.id];
-  const deep = DEEP[n.id];
   card.innerHTML = `
-    <strong>${escapeHtml(n.demoTitle || cfg.label)}</strong>
-    <p class="demo-sub">${escapeHtml(n.output || 'Apply this OpenShift AI capability to your candidate.')}</p>
+    <strong>${escapeHtml(cfg.title)}</strong>
+    <p class="demo-sub">${escapeHtml(cfg.sub)}</p>
+    <div class="opt-row">${cfg.options.map((o, i) => `
+      <button class="opt-btn" data-i="${i}" type="button"><b>${escapeHtml(o.name)}</b><span>${escapeHtml(o.hint)}</span>${o.tag ? `<i>${escapeHtml(o.tag)}</i>` : ''}</button>`).join('')}
+    </div>
     <div id="featureHost"></div>
-    <div class="delta-chips">${Object.entries(cfg.deltas).map(([k, v]) => `<span class="delta-chip" data-k="${k}">${escapeHtml(DIM_LABEL[k])} <b>+${v}</b></span>`).join('')}</div>
-    <div id="demoOutput" class="demo-output">${journey.baseline ? 'Running…' : 'Run the baseline eval first, then apply this improvement.'}</div>
-    <button class="primary-action" id="impBtn" type="button">${n.button || 'Apply improvement'}</button>`;
+    <div class="delta-chips" id="optChips"></div>
+    <div id="demoOutput" class="demo-output">${journey.baseline ? 'Pick a fix above to watch it run.' : 'Run the baseline eval first, then come back and apply a fix.'}</div>`;
   const host = card.querySelector('#featureHost');
   const out = card.querySelector('#demoOutput');
-  const btn = card.querySelector('#impBtn');
-  const chips = [...card.querySelectorAll('.delta-chip')];
-  let busy = false;
-  const finish = () => {
-    recordImprovement(n.id);
-    chips.forEach(c => c.classList.add('on'));
+  const chipsBox = card.querySelector('#optChips');
+  const btns = [...card.querySelectorAll('.opt-btn')];
+  const finish = (o) => {
+    recordImprovement(o.id);
     const proj = computeVerify();
-    out.innerHTML = `<strong>Applied to ${escapeHtml(journey.model.name)}.</strong> Projected after re-eval — grounding ${fmtPct(proj.grounding)}, escalation ${fmtPct(proj.escalation)}, safety ${fmtPct(proj.safety)}.`;
-    btn.disabled = false; btn.textContent = 'Re-run'; busy = false;
-    if (proj) renderRail(railFromMetrics(proj));
+    chipsBox.querySelectorAll('.delta-chip').forEach(c => c.classList.add('on'));
+    out.innerHTML = `<strong>${escapeHtml(IMPROVEMENTS[o.id].label)} applied to ${escapeHtml(journey.model.name)}.</strong> Projected after re-eval: grounding ${fmtPct(proj.grounding)}, escalation ${fmtPct(proj.escalation)}, safety ${fmtPct(proj.safety)}.`;
+    renderRail(railFromMetrics(proj));
     refreshChip();
   };
-  const run = () => {
-    if (busy || !journey.baseline) return;
-    busy = true; btn.disabled = true;
-    chips.forEach(c => c.classList.remove('on'));
-    if (deep) deep(host, finish);
-    else fx.after(500, finish);
+  const select = (i) => {
+    if (!journey.baseline) return;
+    const o = cfg.options[i];
+    fx.clear();
+    btns.forEach((b, bi) => b.classList.toggle('selected', bi === i));
+    chipsBox.innerHTML = Object.entries(IMPROVEMENTS[o.id].deltas).map(([k, v]) =>
+      `<span class="delta-chip" data-k="${k}">${escapeHtml(DIM_LABEL[k])} <b>+${v}</b></span>`).join('');
+    out.innerHTML = 'Running\u2026';
+    o.render(host, () => finish(o));
   };
-  btn.addEventListener('click', run);
-  if (journey.baseline) fx.after(300, run);
+  btns.forEach(b => b.addEventListener('click', () => select(Number(b.dataset.i))));
+  if (journey.baseline) fx.after(300, () => select(0));
+}
+
+function mountKnowledge(card) {
+  mountOptions(card, {
+    title: 'Ground the assistant in bank documents',
+    sub: 'Start with retrieval over the docling corpus, then pick how far to take it.',
+    options: [
+      { id: 'RAG', name: 'RAG', hint: 'Retrieve and cite the current policy', render: deepRAG },
+      { id: 'ARAG', name: 'AutoRAG', hint: 'Sweep retrieval configs against the eval', tag: 'Tech Preview', render: deepARAG },
+      { id: 'AGRAG', name: 'Agentic RAG', hint: 'The agent picks tools per step', render: DEEP.AGRAG },
+      { id: 'ALTRAG', name: 'Graph / SQL', hint: 'Structured facts join retrieval', tag: 'Industry pattern', render: DEEP.ALTRAG }
+    ]
+  });
+}
+function mountBehavior(card) {
+  mountOptions(card, {
+    title: 'Pick the lightest fix that holds',
+    sub: 'Prompts take a day. Inference-time scaling needs no retraining. Fine-tuning is durable but needs data.',
+    options: [
+      { id: 'PROMPT', name: 'Prompt engineering', hint: 'Clearer instructions and format', render: DEEP.PROMPT },
+      { id: 'ITS', name: 'Inference-time scaling', hint: 'More reasoning at runtime (its_hub)', render: renderITSPicker },
+      { id: 'TRAIN', name: 'Create data & fine-tune', hint: 'SDG Hub + Training Hub (SFT / OSFT)', render: deepTUNE }
+    ]
+  });
+}
+function mountSafety(card) {
+  mountOptions(card, {
+    title: 'Find the failures, then lock them out',
+    sub: 'Run the passes in order. Each one records its own gain.',
+    options: [
+      { id: 'REDTEAM', name: 'Red team', hint: 'Attack campaign + adversarial variants', render: DEEP.REDTEAM },
+      { id: 'GARAK', name: 'Garak probes', hint: 'Saved, repeatable safety suite', tag: 'Tech Preview', render: DEEP.GARAK },
+      { id: 'GUARD', name: 'Runtime guardrails', hint: 'TrustyAI Guardrails Orchestrator', render: DEEP.GUARD }
+    ]
+  });
 }
 
 function mountForkRecommend(card) {
@@ -1648,8 +1622,8 @@ function mountForkRecommend(card) {
   const b = journey.baseline;
   const gaps = [
     { dim: 'grounding', label: 'Knowledge / policy grounding', node: 'RAG' },
-    { dim: 'escalation', label: 'Escalation behavior', node: 'QRETRAIN' },
-    { dim: 'safety', label: 'Safety / jailbreak', node: 'REDTEAM' }
+    { dim: 'escalation', label: 'Escalation behavior', node: 'BEHAVE' },
+    { dim: 'safety', label: 'Safety / jailbreak', node: 'SAFETY' }
   ].map(g => ({ ...g, deficit: round1(THRESHOLDS[g.dim] - b[g.dim]) }));
   gaps.sort((a, z) => z.deficit - a.deficit);
   const top = gaps[0];
@@ -1675,8 +1649,8 @@ function mountGate(card) {
   const labels = { grounding: 'Policy grounding', escalation: 'Escalation recall', safety: 'Safety pass' };
   const fmtD = v => (v > 0 ? '+' : '') + round1(v);
   card.innerHTML = `
-    <strong>Launch gate — tune the policy live</strong>
-    <p class="demo-sub"><b>Drag the thresholds</b> — the candidate ships or loops back in real time against the launch policy you set earlier.</p>
+    <strong>Launch gate: tune the policy live</strong>
+    <p class="demo-sub"><b>Drag the thresholds.</b> The candidate ships or loops back in real time against the launch policy you set earlier.</p>
     <div id="gateKnobs"></div>
     <ul class="gate-list" id="gateList"></ul>
     <div id="demoOutput" class="demo-output"></div>`;
@@ -1694,8 +1668,8 @@ function mountGate(card) {
       : '';
     listEl.innerHTML = dims.map(d => { const ok = res[d] >= THRESHOLDS[d]; return `<li class="${ok ? 'ok' : 'pending'}"><i></i><span>${escapeHtml(labels[d])}</span><b>${fmtPct(res[d])} / ${fmtThresh(d, THRESHOLDS[d])}</b></li>`; }).join('');
     out.innerHTML = cleared
-      ? `<strong>Ships ✓ — ${passDims.length}/3 thresholds met.</strong> The targeted gap is cleared at your policy; ship to pilot and loop the rest through the flywheel.${liftNote} Choose <b>Yes</b> to govern &amp; release.`
-      : `<strong>Blocked — ${passDims.length}/3 thresholds met.</strong> Your policy is stricter than the candidate clears. Lower a bar, or choose <b>No</b> to loop failures back through the flywheel.${liftNote}`;
+      ? `<strong>Ships ✓ (${passDims.length}/3 thresholds met).</strong> The targeted gap is cleared at your policy; ship to pilot and loop the rest through the flywheel.${liftNote} Choose <b>Yes</b> to govern &amp; release.`
+      : `<strong>Blocked (${passDims.length}/3 thresholds met).</strong> Your policy is stricter than the candidate clears. Lower a bar, or choose <b>No</b> to loop failures back through the flywheel.${liftNote}`;
     renderRail(railFromMetrics(res));
   };
   renderKnobs(card.querySelector('#gateKnobs'), dims, {
@@ -1712,8 +1686,8 @@ function mountShip(card) {
   journey.shipped = true;
   const impr = journey.improvements.map(i => i.label);
   card.innerHTML = `
-    <strong>Release bundle — ${escapeHtml(m.name)} v2</strong>
-    <p class="demo-sub">Everything required to ship, recorded for audit — then the app calls the governed assistant in production.</p>
+    <strong>Release bundle · ${escapeHtml(m.name)} v2</strong>
+    <p class="demo-sub">Everything required to ship, recorded for audit. The app then calls the governed assistant in production.</p>
     <ul class="ship-list">
       <li><i></i>Model version <b>${escapeHtml(m.name)} · v2</b></li>
       <li><i></i>Improvements <b>${impr.length ? escapeHtml(impr.join(', ')) : 'baseline only'}</b></li>
@@ -1788,7 +1762,7 @@ const DEEP = {
   ARAG: deepARAG,
   AGRAG: (h, d) => deepVariants('AGRAG', h, 'console', [
     [
-      ['cmd', 'trace · “I was charged twice at a hotel — what do I do?”'],
+      ['cmd', 'trace · “I was charged twice at a hotel, what do I do?”'],
       ['muted', 'agent planning…'],
       ['in', 'classify_intent → duplicate_charge_dispute'],
       ['in', 'retrieve(policy, “duplicate authorization hold”)'],
@@ -1922,17 +1896,17 @@ function deepRAG(host, onDone) {
       q: 'How long does the bank have to resolve a billing-error dispute on my card?',
       before: 'was: “you get a provisional credit in a few days,” no citation · wrong regulation',
       chunks: [
-        ['chunk-line', '<b>Cardholder Agreement §12.3</b> — written acknowledgment within <b>30 days</b>; disputed amount <b>not due</b> during review <i>· eff. 2024-01</i>'],
-        ['chunk-line', '<b>Reg Z §1026.13(c)(2)</b> — resolve within <b>2 complete billing cycles</b>, not to exceed <b>90 days</b>']
+        ['chunk-line', '<b>Cardholder Agreement §12.3</b>: written acknowledgment within <b>30 days</b>; disputed amount <b>not due</b> during review <i>· eff. 2024-01</i>'],
+        ['chunk-line', '<b>Reg Z §1026.13(c)(2)</b>: resolve within <b>2 complete billing cycles</b>, not to exceed <b>90 days</b>']
       ],
-      ans: 'The bank must acknowledge the billing-error notice within <b>30 days</b> and resolve it within <b>two complete billing cycles</b> (max <b>90 days</b>); you do not have to pay the disputed amount — and it accrues no finance charges — while it is under review (Reg Z §1026.13; Agreement §12.3). <span class="cite">[cited]</span>'
+      ans: 'The bank must acknowledge the billing-error notice within <b>30 days</b> and resolve it within <b>two complete billing cycles</b> (max <b>90 days</b>). You do not have to pay the disputed amount while it is under review, and it accrues no finance charges (Reg Z §1026.13; Agreement §12.3). <span class="cite">[cited]</span>'
     },
     {
       q: 'How long does the cardholder have to report an unauthorized transaction?',
       before: 'was: “I think 30 days,” no citation',
       chunks: [
-        ['chunk-line', '<b>Cardholder Agreement §11.2</b> — report unauthorized use <b>promptly</b>; <b>zero liability</b> when reported in time <i>· eff. 2024-01</i>'],
-        ['chunk-line', '<b>Reg Z §1026.12(b)</b> — cardholder liability for unauthorized credit-card use is capped at <b>$50</b>']
+        ['chunk-line', '<b>Cardholder Agreement §11.2</b>: report unauthorized use <b>promptly</b>; <b>zero liability</b> when reported in time <i>· eff. 2024-01</i>'],
+        ['chunk-line', '<b>Reg Z §1026.12(b)</b>: cardholder liability for unauthorized credit-card use is capped at <b>$50</b>']
       ],
       ans: 'The cardholder should report unauthorized use promptly; under the zero-liability policy (Cardholder Agreement §11.2) there is no liability when reported in time, and Reg Z §1026.12(b) caps liability for unauthorized credit-card use at <b>$50</b> in any case. <span class="cite">[cited]</span>'
     }
@@ -1943,7 +1917,7 @@ function deepRAG(host, onDone) {
       <div class="qa-q"><b>Q</b>&nbsp; ${escapeHtml(v.q)}</div>
       <div class="qa-label">Retrieved policy context</div>
       <div class="qa-chunks" id="ragChunks"></div>
-      <div class="qa-label">Grounded answer <i class="qa-before">— ${escapeHtml(v.before)}</i></div>
+      <div class="qa-label">Grounded answer <i class="qa-before">(${escapeHtml(v.before)})</i></div>
       <div class="qa-ans" id="ragAns"><span class="muted-i">awaiting retrieval…</span></div>
     </div>`;
   const chunks = host.querySelector('#ragChunks');
@@ -2009,7 +1983,7 @@ function deepTRAIN(host, onDone) {
         ['ok', 'epoch 1 · train 0.97 · val 1.08 · escalation 80% → 88%'],
         ['ok', 'epoch 2 · train 0.61 · val 0.79 · escalation 88% → 93%'],
         ['ok', 'epoch 3 · train 0.48 · val 0.66 · escalation 93% → 96% · tone 71% → 93%'],
-        ['warn', 'val plateaus after epoch 3 — stop to avoid overfit'],
+        ['warn', 'val plateaus after epoch 3, stopping to avoid overfit'],
         ['warn', '2 regression alerts on refund-tone suite (review queued)']
       ]
     },
@@ -2077,7 +2051,7 @@ function deepTRAIN(host, onDone) {
 function deepITS(host, onDone) {
   const variants = [
     {
-      claim: '“My elderly father was tricked into buying gift cards — should we escalate this as fraud?”',
+      claim: '“My elderly father was tricked into buying gift cards. Should we escalate this as fraud?”',
       standard: '“This may be eligible for a dispute.”',
       reasoning: [
         ['in', 'pattern: gift-card purchase + third-party pressure'],
@@ -2136,7 +2110,7 @@ const ITS_STRATEGIES = [
     id: 'best-of-n', name: 'Best-of-N',
     desc: 'Generate N candidates, score each with a reward model or LLM-as-judge, select the highest.',
     bestFor: 'open-ended generation, quality-sensitive tasks',
-    why: 'FinanceBench: Best-of-N with Llama 3.1-70B reached 83.7%, matching GPT-4o; 8B models gained +13 pts — frontier quality without API dependency.',
+    why: 'FinanceBench: Best-of-N with Llama 3.1-70B reached 83.7%, matching GPT-4o; 8B models gained +13 points, frontier quality without an API dependency.',
     svg: `
       <g class="its-g"><rect x="2" y="22" width="40" height="26" rx="5" fill="#EE0000"/><text x="22" y="39" text-anchor="middle" fill="#fff" font-size="8" font-weight="bold">Prompt</text><line x1="44" y1="35" x2="58" y2="35" stroke="#555" stroke-width="1.5"/></g>
       <g class="its-g"><rect x="60" y="4" width="38" height="16" rx="3" fill="#555"/><text x="79" y="15" text-anchor="middle" fill="#bbb" font-size="7">R1</text><rect x="60" y="22" width="38" height="16" rx="3" fill="#EE0000"/><text x="79" y="33" text-anchor="middle" fill="#fff" font-size="7" font-weight="bold">R2</text><rect x="60" y="40" width="38" height="16" rx="3" fill="#555"/><text x="79" y="51" text-anchor="middle" fill="#bbb" font-size="7">R3</text><rect x="60" y="56" width="38" height="16" rx="3" fill="#555"/><text x="79" y="67" text-anchor="middle" fill="#bbb" font-size="7">R4</text></g>
@@ -2153,7 +2127,7 @@ const ITS_STRATEGIES = [
     id: 'beam-search', name: 'Beam Search',
     desc: 'Step-by-step generation with beam-width control. A process reward model guides the search at each step.',
     bestFor: 'multi-step reasoning, math, logic',
-    why: 'Searches the reasoning tree one step at a time, pruning weak branches with a process reward model — strongest where the answer needs a verifiable chain of steps.',
+    why: 'Searches the reasoning tree one step at a time, pruning weak branches with a process reward model. Strongest where the answer needs a verifiable chain of steps.',
     svg: `
       <g class="its-g"><rect x="115" y="2" width="50" height="18" rx="4" fill="#EE0000"/><text x="140" y="14" text-anchor="middle" fill="#fff" font-size="7" font-weight="bold">Start</text></g>
       <g class="its-g"><line x1="125" y1="22" x2="50" y2="32" stroke="#EE0000" stroke-width="1"/><line x1="140" y1="22" x2="140" y2="32" stroke="#888" stroke-width="1"/><line x1="155" y1="22" x2="230" y2="32" stroke="#EE0000" stroke-width="1"/><rect x="25" y="32" width="50" height="18" rx="4" fill="#333" stroke="#EE0000" stroke-width="1"/><text x="50" y="42" text-anchor="middle" fill="#fff" font-size="7">A</text><text x="50" y="48" text-anchor="middle" fill="#EE0000" font-size="6">.82</text><rect x="115" y="32" width="50" height="18" rx="4" fill="#505050"/><text x="140" y="42" text-anchor="middle" fill="#888" font-size="7">B</text><text x="140" y="48" text-anchor="middle" fill="#888" font-size="6">.31</text><rect x="205" y="32" width="50" height="18" rx="4" fill="#333" stroke="#EE0000" stroke-width="1"/><text x="230" y="42" text-anchor="middle" fill="#fff" font-size="7">C</text><text x="230" y="48" text-anchor="middle" fill="#EE0000" font-size="6">.74</text></g>
@@ -2171,7 +2145,7 @@ const ITS_STRATEGIES = [
     id: 'particle-filtering', name: 'Particle Filtering',
     desc: 'Probabilistic resampling keeps diverse reasoning paths alive while focusing on promising ones. Includes Entropic PF and Particle Gibbs variants.',
     bestFor: 'complex multi-step problems, tool calling',
-    why: 'Research on HealthBench-Hard: intrinsic token statistics gave +8.7% with no trained reward model — keeps a path beam search would prune.',
+    why: 'Research on HealthBench-Hard: intrinsic token statistics gave +8.7% with no trained reward model. It keeps paths beam search would prune.',
     svg: `
       <g class="its-g"><text x="10" y="14" fill="#aaa" font-size="7" font-weight="bold">P1</text><text x="10" y="36" fill="#aaa" font-size="7" font-weight="bold">P2</text><text x="10" y="58" fill="#EE0000" font-size="7" font-weight="bold">P3</text><text x="35" y="4" fill="#aaa" font-size="6">Step 1</text><text x="110" y="4" fill="#aaa" font-size="6">Step 2</text><text x="185" y="4" fill="#aaa" font-size="6">Step 3</text></g>
       <g class="its-g"><rect x="30" y="7" width="55" height="14" rx="3" fill="#EE0000"/><text x="57" y="17" text-anchor="middle" fill="#fff" font-size="7" font-weight="bold">.82</text><text x="93" y="17" fill="#888" font-size="8">→</text><rect x="30" y="27" width="55" height="14" rx="3" fill="#555"/><text x="57" y="37" text-anchor="middle" fill="#bbb" font-size="7">.31</text><text x="93" y="37" fill="#888" font-size="8">→</text><rect x="30" y="47" width="55" height="14" rx="3" fill="#555"/><text x="57" y="57" text-anchor="middle" fill="#bbb" font-size="7">.45</text><text x="93" y="57" fill="#888" font-size="8">→</text></g>
@@ -2181,7 +2155,7 @@ const ITS_STRATEGIES = [
       ['cmd', 'its run --strategy particle-filtering --particles 3'],
       ['muted', 'resampling toward promising paths…'],
       ['in', 'P1 .82→.71→.78 · P2 .31→.42→.55 · P3 .45→.68→.94'],
-      ['ok', 'P3 wins .94 — kept a path beam search would have pruned']
+      ['ok', 'P3 wins .94, a path beam search would have pruned']
     ]
   }
 ];
@@ -2198,60 +2172,32 @@ function revealOnScroll(root) {
   els.forEach(e => io.observe(e));
 }
 
-function mountITS(card) {
-  if (!journey.model) { card.innerHTML = needModelHTML('apply inference-time scaling'); wireNeedModel(card); return; }
+// Strategy cards for inference-time scaling, rendered inside the behavior
+// step. Cards open the detail modal; picking one applies it to the journey.
+function renderITSPicker(host, onDone) {
   let selId = journey.itsStrategy || ITS_STRATEGIES[0].id;
-  card.innerHTML = `
-    <strong>Inference-time scaling — its_hub</strong>
-    <p class="demo-sub">Spend more compute at inference (no retraining) so the model reasons harder on high-risk claims.</p>
-    <div class="its-algos">
-      <div class="its-algos-head">
-        <h4 class="its-fade">Algorithms</h4>
-        <p class="its-fade" style="transition-delay:.08s">One interface, four strategies — swapping is a one-line change. Click a card to see how each works; Self-Consistency is a safe default.</p>
-      </div>
-      <div class="its-strats" id="itsStrats">${ITS_STRATEGIES.map((s, i) => `
-        <div class="its-strat its-fade ${s.id === selId ? 'selected' : ''}" data-id="${s.id}" role="button" tabindex="0" aria-label="Open ${escapeAttr(s.name)}" style="transition-delay:${(0.16 + i * 0.1).toFixed(2)}s">
-          <h4 class="its-name">${escapeHtml(s.name)}</h4>
-          ${itsSvg(s.svg)}
-          <p class="its-desc">${escapeHtml(s.desc)}</p>
-          <p class="its-best">Best for: ${escapeHtml(s.bestFor)}</p>
-        </div>`).join('')}</div>
-    </div>
-    <div class="delta-chips"><span class="delta-chip" data-k="escalation">Escalation <b>+10</b></span></div>
-    <div id="demoOutput" class="demo-output">${journey.baseline ? 'Click a strategy card to watch it run, then “Use this strategy” to apply it.' : 'Run the baseline eval first, then apply inference-time scaling.'}</div>
-    <button class="primary-action" id="itsApply" type="button">Apply inference-time scaling</button>`;
-  const out = card.querySelector('#demoOutput');
-  const applyBtn = card.querySelector('#itsApply');
-  const chips = [...card.querySelectorAll('.delta-chip')];
-
-  const select = (id) => {
+  host.innerHTML = `
+    <div class="its-strats">${ITS_STRATEGIES.map((s, i) => `
+      <div class="its-strat its-fade ${s.id === selId ? 'selected' : ''}" data-id="${s.id}" role="button" tabindex="0" aria-label="Open ${escapeAttr(s.name)}" style="transition-delay:${(0.08 + i * 0.08).toFixed(2)}s">
+        <h4 class="its-name">${escapeHtml(s.name)}</h4>
+        ${itsSvg(s.svg)}
+        <p class="its-desc">${escapeHtml(s.desc)}</p>
+        <p class="its-best">Best for: ${escapeHtml(s.bestFor)}</p>
+      </div>`).join('')}</div>
+    <p class="its-pick-note">Click a card to see how it works, then use it in the journey. Self-Consistency is a safe default.</p>`;
+  const select = id => {
     selId = id;
     journey.itsStrategy = id;
-    card.querySelectorAll('.its-strat').forEach(c => c.classList.toggle('selected', c.dataset.id === id));
+    host.querySelectorAll('.its-strat').forEach(c => c.classList.toggle('selected', c.dataset.id === id));
   };
-  const apply = () => {
-    if (!journey.baseline) return;
-    recordImprovement('ITS');
-    chips.forEach(c => c.classList.add('on'));
-    const proj = computeVerify();
-    const s = ITS_STRATEGIES.find(x => x.id === selId);
-    out.innerHTML = `<strong>${escapeHtml(s.name)} applied to ${escapeHtml(journey.model.name)}.</strong> High-risk claims now use ${escapeHtml(s.name)} at inference — no retraining. Projected after re-eval — escalation ${fmtPct(proj.escalation)}.`;
-    applyBtn.textContent = 'Re-apply';
-    if (proj) renderRail(railFromMetrics(proj));
-    refreshChip();
-  };
-  // Click a card → open the popup; the diagram animates and the console streams there.
-  // "Use this strategy" adopts it into the journey.
-  const openDetailsFor = id => openITSModal(id, sid => { select(sid); apply(); });
-  card.querySelectorAll('.its-strat').forEach(c => {
-    c.addEventListener('click', () => openDetailsFor(c.dataset.id));
-    c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetailsFor(c.dataset.id); } });
+  host.querySelectorAll('.its-strat').forEach(c => {
+    const open = () => openITSModal(c.dataset.id, sid => { select(sid); onDone && onDone(); });
+    c.addEventListener('click', open);
+    c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
   });
-  applyBtn.addEventListener('click', apply);
-  revealOnScroll(card);
+  revealOnScroll(host);
   select(selId);
-  // Apply the default so the journey can proceed; the algorithm animation lives in the popup.
-  if (journey.baseline) fx.after(300, apply);
+  if (onDone) onDone(); // apply the default so the journey can proceed
 }
 
 // Click-to-detail modal for an ITS strategy (the reference demo's card → modal flow),
@@ -2297,7 +2243,7 @@ function mountDocling(card) {
   const DOCS = [
     {
       file: 'cardholder-agreement.pdf',
-      raw: `FIRST NATIONAL BANK — CARDHOLDER AGREEMENT
+      raw: `FIRST NATIONAL BANK CARDHOLDER AGREEMENT
 Effective: January 1, 2024
 Governing law: United States
 
@@ -2325,7 +2271,7 @@ Account: 4111 **** **** 4421    SSN: ***-**-1188`,
     },
     {
       file: 'fee-schedule-and-dispute-rights.pdf',
-      raw: `FIRST NATIONAL BANK — FEE SCHEDULE & DISPUTE RIGHTS
+      raw: `FIRST NATIONAL BANK FEE SCHEDULE & DISPUTE RIGHTS
 Effective: March 1, 2024
 Governing law: United States
 
@@ -2356,7 +2302,7 @@ Account: 4111 **** **** 4421    SSN: ***-**-1188`,
   ];
   const doc = DOCS[pickVariant('docling', DOCS.length)];
   card.innerHTML = `
-    <strong>Convert enterprise documents — docling</strong>
+    <strong>Convert enterprise documents with docling</strong>
     <p class="demo-sub">Messy banking PDFs become cited, metadata-rich chunks ready for retrieval, eval, and training.</p>
     <div class="io-grid">
       <div class="io-col"><span class="io-label">Input · ${escapeHtml(doc.file)}</span><pre class="io-raw" id="ioIn"></pre></div>
@@ -2402,7 +2348,7 @@ function reflowDoclingDoc(card, DOCS) {
 
 function mountTrace(card) {
   card.innerHTML = `
-    <strong>Trace-to-Dataset — close the loop</strong>
+    <strong>Trace-to-Dataset: close the loop</strong>
     <p class="demo-sub">A failed production trace becomes a labeled example that flows back into data preparation.</p>
     <div id="traceHost"></div>
     <div id="demoOutput" class="demo-output">Converting trace…</div>
@@ -2432,35 +2378,10 @@ function mountTrace(card) {
   const run = () => {
     if (busy) return; busy = true; btn.disabled = true;
     deepStream(host, 'console', variants[pickVariant('trace', variants.length)], () => {
-      out.innerHTML = '<strong>Loop closed.</strong> The failure is now reusable eval and training data, not a forgotten anecdote.';
+      out.innerHTML = '<strong>Loop closed.</strong> The failure is now reusable eval and training data.';
       btn.disabled = false; btn.textContent = 'Re-run'; busy = false;
     });
   };
   btn.addEventListener('click', run);
   fx.after(300, run);
-}
-
-/* ---- Decision-node deep dives ---- */
-function mountRetrainDecision(card) {
-  card.innerHTML = `
-    <strong>Customization decision</strong>
-    <p class="demo-sub">Grounded context is present, but the model still fails the dispute-intake rubric. Choose the lightest fix that holds.</p>
-    <table class="cfg-table"><thead><tr><th>option</th><th>time</th><th>data needed</th><th>durability</th></tr></thead><tbody id="retrainRows"></tbody></table>
-    <div id="demoOutput" class="demo-output">Comparing customization paths…</div>`;
-  const body = card.querySelector('#retrainRows');
-  const out = card.querySelector('#demoOutput');
-  const rows = [
-    ['Inference-time scaling', 'minutes', 'none', 'per-call'],
-    ['Prompt fixes', 'hours', 'none', 'medium'],
-    ['Fine-tune (SFT)', 'days', '~2,000 examples', 'durable']
-  ];
-  let i = 0;
-  const add = () => {
-    if (i >= rows.length) { out.innerHTML = 'Pick a path on the right: <b>need it now</b> (inference-time scaling), <b>fix instructions</b> (prompt), or <b>adapt the model</b> (synthetic data + fine-tuning).'; return; }
-    const tr = document.createElement('tr');
-    tr.innerHTML = rows[i++].map(c => `<td>${c}</td>`).join('');
-    body.appendChild(tr);
-    fx.after(reducedMotion() ? 0 : 320, add);
-  };
-  add();
 }
