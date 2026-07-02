@@ -964,3 +964,18 @@ select { border: 1px solid #aaa; border-radius: 4px; padding: .6rem; background:
   padding: .12rem .45rem;
 }
 .its-pick-note { margin: .6rem 0 0; color: #6a7280; font-size: .82rem; }
+
+/* ---- Launch-brief scope chips ---- */
+.scope-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin: .2rem 0 .9rem; }
+.scope-chip {
+  border: 1.5px solid #ddd;
+  border-radius: 999px;
+  background: #fff;
+  color: #6a7280;
+  font-size: .85rem;
+  font-weight: 700;
+  padding: .35rem .8rem;
+  transition: border-color .25s ease, color .25s ease, background .25s ease;
+}
+.scope-chip.on { border-color: #3e8635; color: #1e4f18; background: #f3faf2; }
+.scope-chip.on::before { content: '✓ '; color: #3e8635; }

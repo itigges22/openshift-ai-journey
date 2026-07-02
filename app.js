@@ -634,11 +634,10 @@ function renderDetail() {
           ${n.roadmap ? '<span class="badge yellow">Industry pattern</span>' : ''}
         </div>
         <h1 id="detail-title">${escapeHtml(shortTitle(n.title))}</h1>
-        <p>${escapeHtml(n.why)}</p>
+        <p>${escapeHtml(n.problem)}</p>
         ${journeyChipHTML()}
       </div>
       <div class="detail-body">
-        <div class="info-card"><strong>The situation</strong><p>${escapeHtml(n.problem)}</p></div>
         <div class="demo-card" id="demoCard">
           <strong>${escapeHtml(n.demoTitle || 'Capability preview')}</strong>
           <div id="demoOutput" class="demo-output">${escapeHtml(n.output || 'Preview the result for this capability.')}</div>
@@ -663,7 +662,7 @@ function renderDetail() {
 
 function nextChoices(id) {
   return story.edges.filter(e => e.from === id).map(e => (
-    { label: e.label || 'Continue', detail: nodesById[e.to].why || nodesById[e.to].subtitle, target: e.to }
+    { label: e.label || 'Continue', detail: nodesById[e.to].subtitle || '', target: e.to }
   ));
 }
 function nextLabel(choice) {
@@ -1016,59 +1015,44 @@ function wireNeedModel(card) {
 }
 
 function mountLaunchBrief(card) {
-  const scope = [
-    ['Card dispute support', 'Answer policy questions and walk cardholders through a dispute.'],
-    ['Fraud escalation', 'Spot suspected fraud and route high-risk claims to a specialist.'],
-    ['Multilingual policy Q&A', 'Consistent, grounded answers in English and Spanish.'],
-    ['Human handoff', 'Hand off to a person whenever risk policy requires it.']
-  ];
+  const scope = ['Dispute support', 'Fraud escalation', 'English + Spanish', 'Human handoff'];
   card.innerHTML = `
-    <strong>Use-case intake: credit card dispute assistant</strong>
-    <p class="demo-sub">Start from the business outcome, then connect OpenShift AI around it. This brief drives every later step.</p>
+    <strong>Use-case intake</strong>
+    <p class="demo-sub">One brief drives every later step: what the assistant does, and the numbers it has to hit.</p>
     <div class="brief-label">Assistant scope</div>
-    <ul class="run-steps" id="scopeSteps">${scope.map(s => `<li><i class="dot"></i><span><b>${escapeHtml(s[0])}</b>: ${escapeHtml(s[1])}</span></li>`).join('')}</ul>
+    <div class="scope-chips" id="scopeChips">${scope.map(s => `<span class="scope-chip">${escapeHtml(s)}</span>`).join('')}</div>
     <div class="brief-label">Launch targets</div>
     <div class="brief-targets">
       <div class="brief-goal"><span>Avg handle time</span><b id="bg-t">18 min</b><i>down from 18 min today</i></div>
       <div class="brief-goal"><span>Policy-grounded answers</span><b id="bg-g">0%</b><i>minimum at launch</i></div>
       <div class="brief-goal"><span>Unsafe responses</span><b id="bg-u">2.0%</b><i>hard ceiling</i></div>
     </div>
-    <div id="demoOutput" class="demo-output">Assembling the launch brief…</div>
+    <div id="demoOutput" class="demo-output">Assembling the launch brief\u2026</div>
     <div class="demo-actions">
       <button class="primary-action" id="briefBtn" type="button">Create launch brief</button>
       <button class="doc-button" id="viewLaunchBriefBtn" type="button">View full brief</button>
     </div>`;
-  const els = [...card.querySelectorAll('#scopeSteps li')];
+  const chips = [...card.querySelectorAll('.scope-chip')];
   const out = card.querySelector('#demoOutput');
   const btn = card.querySelector('#briefBtn');
   card.querySelector('#viewLaunchBriefBtn').addEventListener('click', () => openDocModal(launchBriefHTML()));
   let busy = false;
-  const animateTargets = () => {
-    animateValue(card.querySelector('#bg-t'), 18, 12, { dur: 1100, fmt: v => `${Math.round(v)} min` });
-    animateValue(card.querySelector('#bg-g'), 0, 92, { dur: 1100, fmt: v => `${Math.round(v)}%` });
-    animateValue(card.querySelector('#bg-u'), 2, 0.5, { dur: 1100, fmt: v => `${(Math.round(v * 10) / 10).toFixed(1)}%` });
-  };
   const run = () => {
     if (busy) return; busy = true; btn.disabled = true;
-    els.forEach(li => li.className = '');
-    runSequence(els.map((li, i) => ({ ms: 360 + i * 80, li })), {
-      onStep: (idx, phase, s) => {
-        s.li.classList.toggle('running', phase === 'run');
-        if (phase === 'done') { s.li.classList.remove('running'); s.li.classList.add('done'); }
-      },
-      onDone: () => {
-        animateTargets();
-        out.innerHTML = '<strong>Launch brief approved.</strong> These targets drive every later step. Now pick a workload branch on the right: generative assistant or predictive fraud model.';
-        btn.disabled = false; btn.textContent = 'Re-run brief'; busy = false;
-      }
+    chips.forEach(c => c.classList.remove('on'));
+    chips.forEach((c, i) => fx.after(reducedMotion() ? 0 : 240 + i * 200, () => c.classList.add('on')));
+    fx.after(reducedMotion() ? 0 : 240 + chips.length * 200, () => {
+      animateValue(card.querySelector('#bg-t'), 18, 12, { dur: 900, fmt: v => `${Math.round(v)} min` });
+      animateValue(card.querySelector('#bg-g'), 0, 92, { dur: 900, fmt: v => `${Math.round(v)}%` });
+      animateValue(card.querySelector('#bg-u'), 2, 0.5, { dur: 900, fmt: v => `${(Math.round(v * 10) / 10).toFixed(1)}%` });
+      out.innerHTML = '<strong>Launch brief approved.</strong> Pick a workload branch on the right.';
+      btn.disabled = false; btn.textContent = 'Re-run brief'; busy = false;
     });
   };
   btn.addEventListener('click', run);
   fx.after(300, run);
 }
 
-/* ---- Predictive branch: AutoML builds the fraud model, then it is wired
-   into the assistant as a governed tool (Llama Stack -> Responses API). ---- */
 function mountPredictive(card) {
   card.innerHTML = `
     <strong>Build the fraud model, then feed the assistant</strong>
@@ -1550,10 +1534,7 @@ function mountEval(card, mode) {
           cmp.innerHTML = `<div class="cmp-row"><span class="cmp-tag">First verification · lift vs baseline</span>${vsBase}</div>`;
         }
       }
-      const prevNote = journey.prevVerify
-        ? ` The model improved again this lap: grounding ${fmtD(res.grounding - journey.prevVerify.grounding)}, escalation ${fmtD(res.escalation - journey.prevVerify.escalation)}, safety ${fmtD(res.safety - journey.prevVerify.safety)} vs your last pass.`
-        : '';
-      out.innerHTML = `<strong>Verification complete: ${passCount}/3 thresholds cleared.</strong>${prevNote} Total lift vs baseline: grounding ${fmtD(res.grounding - journey.baseline.grounding)}, escalation ${fmtD(res.escalation - journey.baseline.escalation)}, safety ${fmtD(res.safety - journey.baseline.safety)}.`;
+      out.innerHTML = `<strong>Verification complete: ${passCount}/3 thresholds cleared.</strong>`;
     } else {
       const g = dominantGap();
       out.innerHTML = `<strong>Baseline complete.</strong> Biggest gap: <b>${escapeHtml(g.label)}</b> (${fmtPct(journey.baseline[g.dim])} vs ${fmtPct(THRESHOLDS[g.dim])} target).`;
@@ -1685,7 +1666,6 @@ function mountGate(card) {
   journey.verify = res;
   const dims = ['grounding', 'escalation', 'safety'];
   const labels = { grounding: 'Policy grounding', escalation: 'Escalation recall', safety: 'Safety pass' };
-  const fmtD = v => (v > 0 ? '+' : '') + round1(v);
   card.innerHTML = `
     <strong>Launch gate: tune the policy live</strong>
     <p class="demo-sub"><b>Drag the thresholds.</b> The candidate ships or loops back in real time against the launch policy you set earlier.</p>
@@ -1701,13 +1681,11 @@ function mountGate(card) {
     const nowDef = Math.max(0, THRESHOLDS[dom.dim] - res[dom.dim]);
     const cleared = res[dom.dim] >= THRESHOLDS[dom.dim] || (baseDef > 0 && nowDef <= baseDef * 0.15);
     journey.gate = { pass: cleared, passDims: passDims.length };
-    const liftNote = journey.baseline
-      ? ` Cumulative lift from the flywheel: grounding ${fmtD(res.grounding - journey.baseline.grounding)}, escalation ${fmtD(res.escalation - journey.baseline.escalation)}, safety ${fmtD(res.safety - journey.baseline.safety)} vs baseline.`
-      : '';
+
     listEl.innerHTML = dims.map(d => { const ok = res[d] >= THRESHOLDS[d]; return `<li class="${ok ? 'ok' : 'pending'}"><i></i><span>${escapeHtml(labels[d])}</span><b>${fmtPct(res[d])} / ${fmtThresh(d, THRESHOLDS[d])}</b></li>`; }).join('');
     out.innerHTML = cleared
-      ? `<strong>Ships ✓ (${passDims.length}/3 thresholds met).</strong> The targeted gap is cleared at your policy; ship to pilot and loop the rest through the flywheel.${liftNote} Choose <b>Yes</b> to govern &amp; release.`
-      : `<strong>Blocked (${passDims.length}/3 thresholds met).</strong> Your policy is stricter than the candidate clears. Lower a bar, or choose <b>No</b> to loop failures back through the flywheel.${liftNote}`;
+      ? `<strong>Ships ✓ (${passDims.length}/3 thresholds met).</strong> Choose <b>Yes</b> to govern and release.`
+      : `<strong>Blocked (${passDims.length}/3 thresholds met).</strong> Lower a bar, or choose <b>No</b> to loop the failures back into data.`;
     renderRail(railFromMetrics(res));
   };
   renderKnobs(card.querySelector('#gateKnobs'), dims, {
