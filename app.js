@@ -6,7 +6,7 @@ const story = {
   nodes: [
     node('START', '1 · Business goal', 'dispute assistant + workload choice', 'shared', 0, 0, 'Intake', {
       problem: 'The bank wants an assistant that answers dispute questions, collects evidence, and flags fraud. It has to be safe enough for a regulated business.',
-      why: 'Start with a measurable business outcome. This use case needs a generative assistant plus a predictive fraud model, and you build both here.',
+      why: 'Define the outcome first: what the assistant must do, and the numbers it must hit.',
       demoTitle: 'Use-case intake',
       metrics: [['Manual handle time', '18 min', 'bad'], ['Launch target', '≤ 12 min', 'good'], ['Unsafe-response ceiling', '< 0.5%', 'good']],
       output: 'Launch brief approved. Pick a workload branch on the right. The two rejoin at quality targets.',
@@ -14,7 +14,7 @@ const story = {
     }),
     node('AUTOML', 'Predictive model', 'AutoML → assistant tool · Tech Preview', 'shared', 0, 0, 'Build', {
       problem: 'Fraud risk is a scoring problem on structured data. A classic ML model handles it better than an LLM.',
-      why: 'AutoML (Tech Preview) builds the fraud scorer. Llama Stack then exposes it as a tool the assistant calls during a dispute.',
+      why: 'Build the fraud scorer with AutoML, then hand it to the assistant as a tool.',
       demoTitle: 'AutoML run + tool wiring',
       metrics: [['Task', 'Fraud scoring', 'good'], ['Built with', 'AutoML (TP)', 'good'], ['Exposed as', 'LLM tool', 'good']],
       output: 'The predictive model is built, served, and feeding the assistant. Rejoin the main journey.',
@@ -22,7 +22,7 @@ const story = {
     }),
     node('CRIT', '2 · Set quality targets', 'EvalHub Collection', 'data', 0, 0, 'Measure', {
       problem: 'Without a shared definition of good, every later fix is a guess.',
-      why: 'An EvalHub Collection turns your launch targets into repeatable checks that follow every model candidate.',
+      why: 'Turn the launch targets into repeatable checks that follow every model candidate.',
       demoTitle: 'Launch policy',
       metrics: [['Grounding target', '92%', 'good'], ['Escalation target', '95%', 'good'], ['Safety target', '99.5%', 'good']],
       output: 'Collection saved. Baseline, verification, and the launch gate all use these same checks.',
@@ -30,7 +30,7 @@ const story = {
     }),
     node('DATA', '3 · Prepare enterprise data', 'docling', 'data', 0, 0, 'Data prep', {
       problem: 'Policy PDFs and dispute forms are useless to a model until they become clean, cited chunks.',
-      why: 'Docling converts messy bank documents into structured, PII-masked chunks for retrieval, evals, and training.',
+      why: 'Docling turns messy bank PDFs into clean, cited, PII-masked chunks.',
       demoTitle: 'Document conversion',
       metrics: [['Documents converted', '1,284', 'good'], ['Chunks with citations', '98%', 'good'], ['PII fields masked', '100%', 'good']],
       output: 'The policy corpus is ready for retrieval, evaluation, and training.',
@@ -38,7 +38,7 @@ const story = {
     }),
     node('MODEL', '4 · Select & serve a model', 'AI hub catalog → KServe + vLLM', 'neighbor', 0, 0, 'Serve', {
       problem: 'You need a base model that fits your cost and latency budget, served where every team can measure it.',
-      why: 'Pick a validated model from the AI hub catalog. It deploys on KServe with the vLLM runtime behind one OpenAI-compatible endpoint.',
+      why: 'Pick a validated model from the catalog and it deploys straight to a live endpoint.',
       demoTitle: 'Pick a model, get an endpoint',
       metrics: [['Context window', '128k', 'good'], ['Cost / 1k chats', '$2.40', 'good'], ['Endpoint', 'OpenAI-compatible', 'good']],
       output: 'The candidate is live and ready for the baseline.',
@@ -46,7 +46,7 @@ const story = {
     }),
     node('BASE', '5 · Baseline eval', 'EvalHub diagnosis', 'data', 0, 0, 'Measure', {
       problem: 'The assistant sounds fluent. The baseline shows where it actually fails.',
-      why: 'One eval run tells you whether the gap is knowledge, behavior, or safety, so you fix the right thing first.',
+      why: 'Find out where the assistant actually fails before changing anything.',
       demoTitle: 'Baseline result',
       metrics: [['Policy grounded', '71%', 'bad'], ['Escalation recall', '82%', 'bad'], ['Safety pass', '97.8%', 'bad']],
       output: 'Baseline complete. The failures now route the journey.',
@@ -54,14 +54,14 @@ const story = {
     }),
     node('FORK', '6 · Choose the improvement path', 'route by evidence', 'decision', 0, 0, 'Decide', {
       problem: 'Three gaps, one team. Let the evidence pick the first fix.',
-      why: 'Missing knowledge points to RAG. Wrong behavior points to customization. Safety failures point to hardening. The baseline tells you which.',
+      why: 'Let the baseline evidence choose the branch: knowledge, behavior, or safety.',
       demoTitle: 'Failure router',
       output: 'Pick the branch that matches your biggest gap.',
       button: 'Route failure'
     }),
     node('RAG', 'Ground with RAG', 'retrieval + citations', 'data', 0, 0, 'Improve', {
       problem: 'The policy answers already exist in bank documents. The model just cannot cite them.',
-      why: 'RAG grounds answers in your prepared documents, with citations. Then choose how far to optimize retrieval.',
+      why: 'Ground every answer in bank documents, with citations.',
       demoTitle: 'Grounded answer comparison',
       metrics: [['Grounded answers', '71% → 89%', 'good'], ['Citation coverage', '42% → 96%', 'good'], ['Stale answers', '18% → 4%', 'good']],
       output: 'Answers now cite the current policy section instead of guessing.',
@@ -69,7 +69,7 @@ const story = {
     }),
     node('ARAG', 'AutoRAG', 'automated tuning · Tech Preview', 'data', 0, 0, 'Optimize', {
       problem: 'Hand-tuning chunk sizes, retrievers, and rerankers takes days and still misses.',
-      why: 'AutoRAG (Tech Preview) sweeps retrieval configurations and keeps the one that best clears your eval collection.',
+      why: 'AutoRAG sweeps retrieval configurations and keeps the one that best clears your eval.',
       demoTitle: 'AutoRAG experiment board',
       metrics: [['Configs tested', '36', 'good'], ['Best grounded score', '94%', 'good'], ['Latency delta', '+180ms', 'good']],
       output: 'Best retrieval pipeline selected against the same collection.',
@@ -77,7 +77,7 @@ const story = {
     }),
     node('AGRAG', 'Agentic RAG', 'retrieval + tools on demand', 'data', 0, 0, 'Optimize', {
       problem: 'Not every question needs retrieval. Some need a tool call or a follow-up question first.',
-      why: 'The agent decides per step: retrieve policy, call the fraud-risk tool, or ask the customer for what is missing.',
+      why: 'The agent decides per step: retrieve policy, call the fraud tool, or ask the customer.',
       demoTitle: 'Tool-choice trace',
       metrics: [['Correct tool choice', '91%', 'good'], ['Unneeded retrieval', '↓ 38%', 'good'], ['Clarifying questions', '+22%', 'good']],
       output: 'The assistant retrieves only when needed, and uses the predictive fraud score as a tool.',
@@ -85,7 +85,7 @@ const story = {
     }),
     node('ALTRAG', 'Graph / SQL retrieval', 'industry pattern', 'data roadmap', 0, 0, 'Pattern', {
       problem: 'Some answers live in relationships: account status, merchant, claim history.',
-      why: 'Not a named OpenShift AI feature. It is an industry pattern you can build on the platform when structured facts drive the answer.',
+      why: 'An industry pattern you can build here: retrieval over structured relationships.',
       demoTitle: 'Structured retrieval preview',
       metrics: [['Structured facts joined', '4', 'good'], ['Manual lookup avoided', 'Yes', 'good'], ['Availability', 'Build-your-own', 'bad']],
       output: 'Structured banking facts join the retrieval layer for relationship-heavy questions.',
@@ -93,14 +93,14 @@ const story = {
     }),
     node('BEHAVE', 'Fix behavior', 'pick the lightest fix that holds', 'decision', 0, 0, 'Decide', {
       problem: 'The model has the facts but still misses escalations and asks poor follow-up questions.',
-      why: 'Pick the lightest fix that holds: more reasoning at runtime, better instructions, or fine-tuning with data.',
+      why: 'Pick the lightest fix that holds: runtime reasoning, better instructions, or fine-tuning.',
       demoTitle: 'Customization decision',
       output: 'Compare time, data needed, and durability. Then pick a path.',
       button: 'Choose behavior fix'
     }),
     node('ITS', 'Inference-time scaling', 'its_hub', 'data', 0, 0, 'Improve', {
       problem: 'You cannot retrain before the pilot, but high-risk claims need better reasoning today.',
-      why: 'Spend extra compute at inference on the cases that need it. Pick a strategy from its_hub, no retraining.',
+      why: 'Buy better reasoning at runtime with its_hub. No retraining.',
       demoTitle: 'Strategy chooser',
       metrics: [['Escalation recall', '82% → 91%', 'good'], ['P95 latency', '3.8s → 5.6s', 'bad'], ['Applied to', 'High risk only', 'good']],
       output: 'More reasoning budget, only on claims likely to need escalation.',
@@ -108,7 +108,7 @@ const story = {
     }),
     node('PROMPT', 'Prompt engineering', 'instructions & format', 'data', 0, 0, 'Improve', {
       problem: 'Right facts, wrong delivery. Answers sound final while disputes are still under investigation.',
-      why: 'Clearer instructions and output format are the fastest behavior fix when the knowledge is already there.',
+      why: 'Clearer instructions are the fastest fix when the knowledge is already there.',
       demoTitle: 'Prompt diff',
       metrics: [['Format compliance', '76% → 96%', 'good'], ['Overconfident claims', '14% → 3%', 'good'], ['Engineering time', '1 day', 'good']],
       output: 'Responses now cite policy, ask for the transaction date, and hand off suspected fraud.',
@@ -116,7 +116,7 @@ const story = {
     }),
     node('TRAIN', 'Create data & fine-tune', 'SDG Hub + Training Hub', 'data', 0, 0, 'Adapt', {
       problem: 'Durable behavior change needs about 2,000 good examples. The bank has 420.',
-      why: 'SDG Hub generates the missing examples from observed failures. Training Hub then fine-tunes the model (SFT / OSFT).',
+      why: 'Generate the missing training data with SDG Hub, then fine-tune with Training Hub.',
       demoTitle: 'Synthetic data + fine-tuning run',
       metrics: [['Labeled examples', '420 → 2,170', 'good'], ['Escalation recall', '82% → 96%', 'good'], ['Regression alerts', '2', 'bad']],
       output: 'A tuned candidate is ready to verify against the same collection.',
@@ -124,7 +124,7 @@ const story = {
     }),
     node('REDTEAM', 'Red team the assistant', 'attacks + adversarial data', 'data', 0, 0, 'Probe', {
       problem: 'Attackers will not use your test prompts. Find the failures before customers do.',
-      why: 'A red-team campaign finds the jailbreaks. SDG Hub expands each finding into whole families of attack variants.',
+      why: 'Attack your own assistant to find the jailbreaks before customers do.',
       demoTitle: 'Attack campaign',
       metrics: [['Attack prompts', '320', 'good'], ['Successful jailbreaks', '7.2%', 'bad'], ['High-severity findings', '11', 'bad']],
       output: 'Findings become repeatable adversarial test data, not a one-off spreadsheet.',
@@ -132,7 +132,7 @@ const story = {
     }),
     node('GARAK', 'Garak safety probes', 'repeatable scanning · Tech Preview', 'data', 0, 0, 'Probe', {
       problem: 'One-off findings go stale. Safety needs a regression suite that runs on every candidate.',
-      why: 'Garak (Tech Preview in OpenShift AI) turns safety testing into a saved, repeatable probe suite.',
+      why: 'Garak turns safety testing into a saved, repeatable probe suite.',
       demoTitle: 'Probe results',
       metrics: [['Probe pass rate', '97.8% → 99.6%', 'good'], ['Critical failures', '3 → 0', 'good'], ['Regression suite', 'Saved', 'good']],
       output: 'The candidate passes the saved probe suite. Residual risks are recorded.',
@@ -140,7 +140,7 @@ const story = {
     }),
     node('GUARD', 'Runtime guardrails', 'TrustyAI Guardrails Orchestrator', 'neighbor', 0, 0, 'Protect', {
       problem: 'Even a safer model needs a runtime backstop for PII, unsafe advice, and required handoffs.',
-      why: 'The TrustyAI Guardrails Orchestrator screens traffic at runtime with detectors like Granite Guardian. NeMo Guardrails is also supported.',
+      why: 'Guardrails screen every request and response at runtime, as a backstop.',
       demoTitle: 'Guardrail verdicts',
       metrics: [['Unsafe blocked', '99.7%', 'good'], ['False blocks', '1.8%', 'good'], ['Human handoffs', '+12%', 'good']],
       output: 'Unsafe requests are blocked or routed to a human fraud specialist.',
@@ -148,7 +148,7 @@ const story = {
     }),
     node('VERIFY', '7 · Re-serve & verify', 'v2 + the same EvalHub run', 'data', 0, 0, 'Measure', {
       problem: 'Did the fix work? Did it break anything else?',
-      why: 'The improved v2 rolls out behind the same endpoint and the exact same collection runs again. Same checks, same thresholds.',
+      why: 'Prove the fix worked: v2 is measured with the exact same checks as the baseline.',
       demoTitle: 'Verification report',
       metrics: [['Policy grounded', '94%', 'good'], ['Escalation recall', '96%', 'good'], ['Safety pass', '99.6%', 'good']],
       output: 'Before and after, measured with the same checks.',
@@ -156,14 +156,14 @@ const story = {
     }),
     node('GATE', '8 · Ready for production?', 'launch gate', 'decision', 0, 0, 'Decide', {
       problem: 'Ship it, or send the failures back into the data loop?',
-      why: 'The gate checks your verified numbers against the launch policy. Pass ships to governance. Fail feeds the flywheel.',
+      why: 'Verified numbers meet your launch policy: pass ships, fail loops back into data.',
       demoTitle: 'Threshold gate',
       output: 'Tune the thresholds and watch the candidate ship or loop back.',
       button: 'Evaluate gate'
     }),
     node('T2D', 'Trace-to-Dataset', 'feedback flywheel', 'data', 0, 0, 'Learn', {
       problem: 'A failure just taught you something. Keep it.',
-      why: 'Failed traces become new eval and training data, and the loop returns to the improvement decision.',
+      why: 'Every failure becomes new eval and training data. That is the flywheel.',
       demoTitle: 'Trace conversion',
       metrics: [['Traces reviewed', '48', 'good'], ['New eval items', '31', 'good'], ['New training candidates', '17', 'good']],
       output: 'The failure is now reusable data. Loop back to the improvement decision.',
@@ -171,7 +171,7 @@ const story = {
     }),
     node('GOV', '9 · Govern & ship', 'registry, audit → Responses API', 'shared', 0, 0, 'Ship', {
       problem: 'A regulated bank needs lineage, approvals, and a rollback plan before anything goes live.',
-      why: 'Governance bundles the evidence. The production app then calls the assistant through the OpenAI-compatible Responses API.',
+      why: 'Ship with evidence: lineage, approvals, rollback, then one production API call.',
       demoTitle: 'Release bundle + production call',
       metrics: [['Approvals', '4/4', 'good'], ['Audit artifacts', 'Complete', 'good'], ['API', 'OpenAI-compatible', 'good']],
       output: 'Approved, audited, and live in the dispute workflow.',
@@ -633,8 +633,9 @@ function renderDetail() {
           <span class="badge ${n.pillar === 'data' ? 'green' : ''}">${pillarLabel(n)}</span>
           ${n.roadmap ? '<span class="badge yellow">Industry pattern</span>' : ''}
         </div>
-        <h1 id="detail-title">${escapeHtml(shortTitle(n.title))}</h1>
-        <p>${escapeHtml(n.problem)}</p>
+        <h1 id="detail-title">${escapeHtml(n.title)}</h1>
+        <p class="step-what">${escapeHtml(n.why)}</p>
+        <p class="step-why">${escapeHtml(n.problem)}</p>
         ${journeyChipHTML()}
       </div>
       <div class="detail-body">
