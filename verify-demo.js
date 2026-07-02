@@ -34,5 +34,5 @@ const { chromium } = require('playwright');
   console.log(JSON.stringify({ graph, opensDetail, detailTitle, errors }, null, 2));
   await browser.close();
   const guidedOk = graph.nextSteps.length === 1 && graph.lockedCount === graph.nodes - 1;
-  if (errors.length || !opensDetail || graph.nodes !== 22 || !guidedOk) process.exit(1);
+  if (errors.length || !opensDetail || graph.nodes !== 21 || !guidedOk) process.exit(1);
 })();

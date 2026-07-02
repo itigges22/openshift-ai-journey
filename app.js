@@ -36,23 +36,15 @@ const story = {
       output: 'The policy corpus is ready for retrieval, evaluation, and training.',
       button: 'Convert documents'
     }),
-    node('MODEL', '4 · Select & serve a model', 'AI hub catalog → KServe + vLLM', 'neighbor', 0, 0, 'Serve', {
-      problem: 'Every team needs to test against the same live endpoint, and cost and latency are locked in by this pick.',
-      why: 'Pick a validated model from the catalog and it deploys straight to a live endpoint.',
-      demoTitle: 'Pick a model, get an endpoint',
-      metrics: [['Context window', '128k', 'good'], ['Cost / 1k chats', '$2.40', 'good'], ['Endpoint', 'OpenAI-compatible', 'good']],
-      output: 'The candidate is live and ready for the baseline.',
-      button: 'Select & serve'
-    }),
-    node('BASE', '5 · Baseline eval', 'EvalHub diagnosis', 'data', 0, 0, 'Measure', {
-      problem: 'You cannot fix what you have not measured. The baseline shows which gap (knowledge, behavior, or safety) deserves the first investment.',
-      why: 'Find out where the assistant actually fails before changing anything.',
-      demoTitle: 'Baseline result',
+    node('MODEL', '4 · Pick a model & run the baseline', 'AI hub catalog → vLLM → EvalHub', 'data', 0, 0, 'Measure', {
+      problem: 'Cost and latency are locked in by this pick, and you cannot fix what you have not measured. The baseline shows which gap deserves the first investment.',
+      why: 'Pick a validated model, it serves to a live endpoint, and the baseline shows where it fails.',
+      demoTitle: 'Model + baseline',
       metrics: [['Policy grounded', '71%', 'bad'], ['Escalation recall', '82%', 'bad'], ['Safety pass', '97.8%', 'bad']],
       output: 'Baseline complete. The failures now route the journey.',
       button: 'Run baseline eval'
     }),
-    node('FORK', '6 · Choose the improvement path', 'route by evidence', 'decision', 0, 0, 'Decide', {
+    node('FORK', '5 · Choose the improvement path', 'route by evidence', 'decision', 0, 0, 'Decide', {
       problem: 'Fixing the wrong gap wastes weeks. The baseline evidence points at the branch with the biggest payoff.',
       why: 'Let the baseline evidence choose the branch: knowledge, behavior, or safety.',
       demoTitle: 'Failure router',
@@ -146,7 +138,7 @@ const story = {
       output: 'Unsafe requests are blocked or routed to a human fraud specialist.',
       button: 'Test guardrails'
     }),
-    node('VERIFY', '7 · Re-serve & verify', 'v2 + the same EvalHub run', 'data', 0, 0, 'Measure', {
+    node('VERIFY', '6 · Re-serve & verify', 'v2 + the same EvalHub run', 'data', 0, 0, 'Measure', {
       problem: 'Improvements you cannot prove do not ship in a regulated bank. Re-running the same checks makes before and after comparable.',
       why: 'Prove the fix worked: v2 is measured with the exact same checks as the baseline.',
       demoTitle: 'Verification report',
@@ -154,7 +146,7 @@ const story = {
       output: 'Before and after, measured with the same checks.',
       button: 'Re-run collection'
     }),
-    node('GATE', '8 · Ready for production?', 'launch gate', 'decision', 0, 0, 'Decide', {
+    node('GATE', '7 · Ready for production?', 'launch gate', 'decision', 0, 0, 'Decide', {
       problem: 'A clear numeric bar keeps the launch decision out of meeting-room opinion. The numbers decide.',
       why: 'Verified numbers meet your launch policy: pass ships, fail loops back into data.',
       demoTitle: 'Threshold gate',
@@ -169,7 +161,7 @@ const story = {
       output: 'The failure is now reusable data. Loop back to the improvement decision.',
       button: 'Convert trace to dataset'
     }),
-    node('GOV', '9 · Govern & ship', 'registry, audit → Responses API', 'shared', 0, 0, 'Ship', {
+    node('GOV', '8 · Govern & ship', 'registry, audit → Responses API', 'shared', 0, 0, 'Ship', {
       problem: 'Auditors will ask who approved this, what data shaped it, and how to roll it back. This step is that answer.',
       why: 'Ship with evidence: lineage, approvals, rollback, then one production API call.',
       demoTitle: 'Release bundle + production call',
@@ -182,7 +174,7 @@ const story = {
     edge('START', 'CRIT', 'generative assistant', false, 'Build the LLM assistant itself: the conversation, answers, and escalations. Start here.'),
     edge('START', 'AUTOML', 'predictive model', false, 'Optional detour: build the fraud-risk scorer, a classic ML model the assistant will call.'),
     edge('AUTOML', 'CRIT', 'feeds the assistant', false, 'Rejoin the main journey with the fraud tool connected.'),
-    edge('CRIT', 'DATA'), edge('DATA', 'MODEL'), edge('MODEL', 'BASE'), edge('BASE', 'FORK'),
+    edge('CRIT', 'DATA'), edge('DATA', 'MODEL'), edge('MODEL', 'FORK'),
     edge('FORK', 'RAG', 'knowledge / facts', false, 'Pick when answers are wrong or uncited. The model lacks knowledge.'),
     edge('FORK', 'BEHAVE', 'behavior / skill', false, 'Pick when the facts are right but the actions are wrong: missed escalations, poor follow-ups.'),
     edge('FORK', 'REDTEAM', 'safety / jailbreak', false, 'Pick when the model can be jailbroken or leaks what it should not.'),
@@ -258,7 +250,6 @@ const LAB_LINKS = {
   CRIT: ['4-ready-to-scale-201/1-evaluate-genai-applications', 'GenAI evaluation'],
   DATA: ['5-grounded-ai/4-docling', 'document prep with Docling'],
   MODEL: ['9-on-prem-practicum/1-deploy-llms', 'serving on KServe / vLLM'],
-  BASE: ['4-ready-to-scale-201/1-evaluate-genai-applications', 'GenAI evaluation'],
   FORK: ['6-observability/5-feedback-loops', 'feedback loops'],
   RAG: ['5-grounded-ai/1-intro-to-rag', 'building RAG'],
   ARAG: ['5-grounded-ai/8-rag-evals', 'evaluating RAG'],
@@ -961,7 +952,7 @@ function runSequence(steps, { onStep, onDone } = {}) {
 /* ---- Continuity chip shown on every detail view ---- */
 function journeyChipHTML() {
   if (!journey.model) {
-    return '<div id="journeyChip" class="journey-chip empty"><i class="jc-dot"></i>No candidate yet. Start at “Select & serve a model”.</div>';
+    return '<div id="journeyChip" class="journey-chip empty"><i class="jc-dot"></i>No candidate yet. Start at “Pick a model & run the baseline”.</div>';
   }
   const m = journey.model;
   const res = journey.verify || journey.baseline;
@@ -1000,7 +991,6 @@ function mountExperience(n) {
     case 'CRIT': return mountCollection(card);
     case 'DATA': return mountDocling(card);
     case 'T2D': return mountTrace(card);
-    case 'BASE': return mountEval(card, 'baseline');
     case 'VERIFY': return mountEval(card, 'verify');
     case 'FORK': return mountForkRecommend(card);
     case 'BEHAVE': return mountRetrainDecision(card);
@@ -1309,7 +1299,7 @@ function mountModelServe(card) {
     const sel = journey.model;
     card.innerHTML = `
       <strong>Choose your candidate model</strong>
-      <p class="demo-sub">The tradeoff is cost and speed against reasoning depth. Any pick deploys straight to KServe with the vLLM runtime, and the baseline eval will tell you if you chose wrong.</p>
+      <p class="demo-sub">The tradeoff is cost and speed against reasoning depth. Any pick serves on KServe with the vLLM runtime, then the baseline runs against it.</p>
       <div class="model-grid">
         ${MODELS.map(m => `
           <button class="model-card ${sel && sel.id === m.id ? 'selected' : ''}" data-model="${m.id}" type="button">
@@ -1322,7 +1312,8 @@ function mountModelServe(card) {
           </button>`).join('')}
       </div>
       <div id="servePanel"></div>
-      <div id="demoOutput" class="demo-output">${sel ? `Serving ${escapeHtml(sel.name)}\u2026` : 'Select a model to serve it.'}</div>`;
+      <div id="serveOut" class="demo-output" ${sel ? '' : ''}>${sel ? `Serving ${escapeHtml(sel.name)}\u2026` : 'Select a model. It serves, then the baseline eval runs.'}</div>
+      <div id="evalPanel"></div>`;
     card.querySelectorAll('.model-card').forEach(btn => btn.addEventListener('click', () => {
       const m = MODELS.find(x => x.id === btn.dataset.model);
       const changed = !journey.model || journey.model.id !== m.id;
@@ -1331,13 +1322,17 @@ function mountModelServe(card) {
       refreshChip();
       draw();
     }));
-    if (sel) renderServe(card.querySelector('#servePanel'), card.querySelector('#demoOutput'));
+    if (sel) {
+      renderServe(card.querySelector('#servePanel'), card.querySelector('#serveOut'), () => {
+        renderEval(card.querySelector('#evalPanel'), 'baseline');
+      });
+    }
   };
   draw();
 }
 
 // Serve the selected candidate on KServe + vLLM inside the model step.
-function renderServe(host, out) {
+function renderServe(host, out, onDone) {
   const m = journey.model;
   const version = journey.served && journey.served.version === 'v2' ? 'v2' : 'v1';
   host.innerHTML = `
@@ -1377,6 +1372,7 @@ function renderServe(host, out) {
     btn.disabled = false; busy = false;
     renderRail([['Runtime', 'vLLM', 'good'], ['Accelerator', v.accel, 'good'], ['Endpoint', 'OpenAI-compatible', 'good']]);
     refreshChip();
+    if (onDone) onDone();
   };
   const run = () => {
     if (busy) return; busy = true; btn.disabled = true;
@@ -1397,14 +1393,17 @@ function renderServe(host, out) {
     apply(v, false); els.forEach(li => li.classList.add('done')); bar.style.width = '100%';
     descriptorBox.textContent = serveDescriptorJSON(m, version, v); connBox.textContent = serveConnectionJSON(m, version, v);
     out.innerHTML = `<strong>${escapeHtml(m.name)} ${escapeHtml(version)} is live.</strong> Click <b>Re-deploy</b> to roll out on a different cluster profile.`;
+    if (onDone) onDone();
   } else fx.after(260, run);
 }
 
-function mountEval(card, mode) {
+function mountEval(card, mode) { renderEval(card, mode); }
+
+function renderEval(card, mode) {
   const isVerify = mode === 'verify';
   if (!journey.model) { card.innerHTML = needModelHTML('run an evaluation'); wireNeedModel(card); return; }
   if (isVerify && !journey.baseline) {
-    card.innerHTML = `<strong>Run the baseline first</strong><p class="demo-sub">Verification re-runs the same EvalHub Collection. Run the baseline eval and apply at least one improvement, then return here.</p>`;
+    card.innerHTML = `<strong>Run the baseline first</strong><p class="demo-sub">Verification re-runs the same EvalHub Collection. Pick a model, run the baseline, and apply at least one improvement first.</p>`;
     return;
   }
   const m = journey.model;
@@ -1646,7 +1645,7 @@ function mountRetrainDecision(card) {
 
 function mountForkRecommend(card) {
   if (!journey.baseline) {
-    card.innerHTML = `<strong>Run the baseline first</strong><p class="demo-sub">The recommended path is chosen from your baseline eval. Run the baseline step, then return here.</p>`;
+    card.innerHTML = `<strong>Run the baseline first</strong><p class="demo-sub">The recommended path is chosen from your baseline. Pick a model and run the baseline first, then return here.</p>`;
     return;
   }
   // Route from the latest measured scores: after a flywheel lap this is the
