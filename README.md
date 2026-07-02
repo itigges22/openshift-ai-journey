@@ -1,32 +1,47 @@
-# OpenShift AI Journey
+# OpenShift AI Journey — Connecting Models to Data
 
-A Red Hat-branded, interactive guided journey through building trustworthy AI on Red Hat OpenShift AI — a static website covering the full lifecycle: choosing a workload (predictive or generative), connecting models to enterprise data, evaluating quality, improving behavior, reducing risk, governing, and shipping.
+A Red Hat-branded, interactive guided journey through building trustworthy AI on Red Hat OpenShift AI. One banking scenario carries the whole demo: **a credit-card dispute assistant**, taken from business goal to governed production.
 
-This is the **generative-AI** journey: the assistant is an LLM workload served on KServe with the vLLM runtime. Red Hat OpenShift AI runs predictive (classic ML) and generative workloads on the same platform — the predictive-vs-generative decision is made at **Select a model**, and the two connect (an existing fraud-risk ML model is exposed as a governed tool the assistant calls).
+The framing for the audience: in a regulated business, "the demo looked good" doesn't ship. The journey shows how the platform closes that gap — connect models to enterprise data, prove improvement with repeatable evals, reduce risk, and ship with governance.
 
-The demo turns the original Mermaid decision pathway into a large landing-page decision tree and a guided storybook. The whole journey follows one banking use case: a credit-card dispute support and risk operations assistant.
+## The journey (23 steps)
 
-After the business goal, the journey **splits on workload type**: a *generative AI* branch (the LLM assistant) and a *predictive AI/ML* branch that builds a fraud-risk model with **AutoML** and then **feeds it into the LLM** as a governed tool before the two rejoin. This mirrors how Red Hat OpenShift AI runs predictive and generative workloads on one platform and connects them.
+A guided decision map (laid out with Dagre) where only the next step is lit. The spine:
 
-The **Inference-Time Scaling** step is a strategy chooser: pick among Self-Consistency, Best-of-N, Beam Search, or Particle Filtering — each card has a faithful diagram, a "best for" tag, a staggered fade-in, and an "ⓘ How it works" detail modal with real benchmark results — and the choice carries through the journey.
+1. **Business goal** — launch brief + workload choice (generative assistant and/or predictive fraud model)
+2. **Predictive model** *(optional branch)* — AutoML (Tech Preview) builds a fraud scorer; Llama Stack exposes it as a tool the assistant calls
+3. **Set quality targets** — EvalHub Collection with user-tunable thresholds
+4. **Select a model** — AI hub catalog (Granite 4.1 8B / Llama 3.3 70B / Mistral Small 3.1 24B)
+5. **Prepare enterprise data** — docling document conversion
+6. **Serve the model** — KServe + vLLM (llm-d for distributed inference)
+7. **Baseline eval** — same collection, failures diagnosed
+8. **Choose the improvement path** — evidence routes to one of three branches:
+   - **Knowledge** → Ground with RAG → AutoRAG (TP) / Agentic RAG / Graph-SQL retrieval (industry pattern)
+   - **Behavior** → Fix behavior → Inference-time scaling (its_hub) / Prompt engineering / Create data & fine-tune (SDG Hub + Training Hub)
+   - **Safety** → Red team + adversarial data → Garak probes (TP) → Runtime guardrails (TrustyAI Guardrails Orchestrator)
+9. **Re-serve & verify** — v2 rolls out behind the same endpoint, the same collection re-runs, before/after animates
+10. **Ready for production?** — launch gate with live threshold knobs; failing loops through **Trace-to-Dataset** back to the improvement decision (the flywheel)
+11. **Govern & ship** — release bundle, then the production app calls the assistant via the OpenAI-compatible Responses API (Llama Stack)
 
-Notes on realism and state:
+The user's model choice is carried end to end (continuity chip + Evidence rail on every step). Re-running any step rotates through scripted data variants so a presenter never shows identical output twice.
 
-- **Realistic metric ceilings.** Improved candidates approach but never claim ~99.9% — grounding caps near 97.5%, escalation near 96.5%, safety near 99.7%.
-- **Tighter flywheel.** Once the improved version (v2) is served, looping the flywheel returns to the improvement decision and goes straight to verification — no redundant re-prepare/re-deploy/re-serve.
-- **Explored-node memory.** Every node you open is remembered (green ✓ on the map) and stays clickable, even after rewinding or looping onto a different branch, so you always know what you've seen.
-- **Tooling.** Predictive models feed the assistant as governed tools through **Llama Stack** and are called via the OpenAI-compatible **Responses API**.
+## Technical accuracy notes
+
+- EvalHub, Training Hub (SFT/OSFT), SDG Hub, its_hub, AI hub, llm-d, docling, Llama Stack Responses API — all real Red Hat / Red Hat AI Innovation Team names.
+- AutoML, AutoRAG, and the Garak-based red-teaming harness are **Technology Preview** in OpenShift AI 3.4 and labeled as such.
+- Runtime guardrails lead with the **TrustyAI Guardrails Orchestrator**; NeMo Guardrails is mentioned as an additionally supported option.
+- Graph/SQL RAG is labeled an **industry pattern**, not a Red Hat roadmap item.
+- Banking content follows Reg Z correctly: credit-card billing-error disputes are acknowledged within 30 days and resolved within two billing cycles (max 90 days); unauthorized-use liability is capped at $50 (§1026.12(b)). Provisional credit within 10 business days is a Reg E (debit/EFT) concept and is not claimed for credit cards.
 
 ## What is included
 
-- `index.html` – static app shell.
-- `styles.css` – Red Hat-inspired visual system, map layout, responsive styles.
-- `app.js` – decision tree data, banking story content, route rendering, and mini-demo interactions.
-- `assets/vendor/dagre.min.js` – vendored Dagre graph-layout library (offline) used to lay out the decision map.
-- `assets/red-hat-logo-on-dark.svg` – official Red Hat-hosted logo asset for the dark header.
-- `assets/red-hat-logo.svg` and `assets/red-hat-logo-color-on-white.svg` – additional Red Hat-hosted logo variants fetched for local use.
-- `docs/planning/` – plan-first specs and test spec for the demo build.
-- `pillar-decision-pathway-v3 (1).mermaid` – source pathway.
+- `index.html` – static app shell (landing framing, journey map, detail views).
+- `styles.css` – Red Hat-inspired visual system.
+- `app.js` – journey data, banking story content, routing, and all interactive mini-demos.
+- `assets/vendor/dagre.min.js` – vendored layout library (offline).
+- `assets/*.svg` – Red Hat logo assets.
+- `docs/planning/` – plan-first specs from the original build.
+- `verify-demo.js` – Playwright smoke test (expects 23 nodes, guided journey, no console errors).
 
 ## Run locally
 
@@ -34,94 +49,15 @@ Notes on realism and state:
 python3 -m http.server 4173
 ```
 
-Then open:
-
-```text
-http://127.0.0.1:4173/
-```
-
-## Journey map
-
-The decision map is laid out automatically with Dagre into a clean top-to-bottom
-flow (intake → baseline → choose a gap → improve → re-serve → verify → ship) and is
-presented as a **guided journey**:
-
-- Only the current step (or, at a decision, the available branches) is lit with a red
-  outline and a **Click** badge. Steps you have completed stay coloured and the path you
-  took is traced in a bold line.
-- Every step you have not reached yet is greyed out and not clickable, so the next move
-  is always obvious. Choosing a branch greys out the branches you did not take.
-- The map re-centres on the next step each time you return to it. **Drag** to pan,
-  **scroll** to zoom, and **double-click** the background to reset the framing.
-- Clicking a completed step rewinds the journey to it, so you can back up and explore a
-  different branch.
-
-## The carried-through model journey
-
-The detail views are a connected, stateful demo, not isolated previews. The user
-"deploys a model" and that same candidate is carried end to end:
-
-1. **Select a model** (`3a`) — pick Granite, Llama, or Mixtral. The choice persists.
-2. **Serve / Baseline eval** — the chosen model is served on **KServe with the vLLM
-   runtime**; the serve view shows the `InferenceService` descriptor and example
-   OpenAI-compatible connection data as JSON, and each re-deploy rolls out on a
-   different cluster profile (accelerator/region/replicas). The candidate is then run
-   through an animated EvalHub Collection; baseline scores are derived from the selected
-   model (with light live jitter) and stored.
-3. **Choose the improvement path** — the recommended branch is computed from the
-   baseline's biggest gap (grounding → RAG, escalation → behavior, safety → red team).
-4. **Apply improvements** — each improvement records metric deltas against the candidate.
-5. **Verify** — re-runs the same collection, animating before→after bars from the stored
-   baseline using the accumulated improvements. Each flywheel lap reports the gain **since
-   your last pass** (run-over-run delta) as well as the **total lift vs baseline**, so the
-   improvement is shown for you instead of computed in your head. Returning to Verify after
-   applying a new improvement auto-recomputes rather than showing a stale result.
-6. **Launch gate → Govern → Production** — the gate checks the verified numbers, and the
-   release/production views show the actual model name, version, and final metrics.
-
-A continuity chip on every detail view and the right-side **Evidence** rail always show
-the live candidate and its current metrics. Animations are driven by a single timer
-manager that is cleared on every view change (no leaked/duplicated animations) and they
-respect `prefers-reduced-motion`.
-
-### Per-node deep dives
-
-Each step is its own mini deep-dive into that capability, in a consistent set of
-animated, realistic formats:
-
-- **Set quality targets** — builds the EvalHub Collection and opens a document-style
-  **collection brief** (modal) with the full eval specification, thresholds, and sign-offs.
-- **Prepare data (docling)** — shows a raw bank PDF **input** typed out next to the
-  parsed structured-JSON **output** (citations extracted, PII masked).
-- **Baseline / Verify (EvalHub)** — a streaming **benchmark console** of real test prompts
-  with pass/fail, alongside the animated metric bars.
-- **Knowledge (RAG)** — a grounded-answer comparison: retrieved policy chunks with
-  citations vs. the old ungrounded answer. **AutoRAG** streams a config-sweep table.
-  **Agentic RAG** streams a tool-call trace.
-- **Behavior** — **prompt engineering** shows a system-prompt diff; **Training Hub** shows
-  a loss curve and epoch log; **SDG Hub** streams generated synthetic examples.
-- **Safety** — **Red teaming** streams an attack campaign (which prompts jailbreak);
-  **Garak** streams a probe suite; **NeMo Guardrails** streams runtime block/handoff/allow
-  verdicts; adversarial **SDG** streams generated attack variants.
-- **Trace-to-Dataset** — streams a failed production trace being relabeled into a dataset.
-
-Every improvement's deep dive also records its metric deltas against the candidate, so the
-demos are not just illustrative — they drive the verify/gate/ship numbers.
-
-Re-running any step shows **different data each time**: serve, baseline/verify consoles,
-docling documents, traces, and every deep dive rotate through multiple scripted data sets,
-so a presenter can click "Re-run" without repeating the same output. The **Agentic RAG**
-trace also shows the predictive fraud-risk ML model being called as a tool and feeding its
-score into the LLM — the concrete "ML connects to the LLM" path.
+Then open `http://127.0.0.1:4173/`.
 
 ## Presenter flow
 
-1. Open the map — only **Business goal** is lit. Click it and walk down the lit steps.
-2. At **Select a model**, pick a candidate — the rest of the journey reflects it.
-3. Run the **baseline eval** and watch the EvalHub run; note the recommended path.
-4. At **Choose the improvement path**, pick one of the three lit branches: knowledge, behavior, or safety.
-5. Apply the branch's improvements, then **Verify**, pass the **launch gate**, and **ship** to production.
-6. Use **Restart** (in a step's header) to reset the guided journey and model state.
+1. Landing page sets the scenario — read it aloud; it is the "why" of the demo.
+2. Click through the lit steps. At **Select a model**, pick a candidate; everything downstream reflects it.
+3. Run the **baseline**, take the recommended branch, apply an improvement.
+4. **Re-serve & verify**, pass the **launch gate**, and ship — or fail the gate and show the flywheel via Trace-to-Dataset.
+5. **Restart** (detail header) resets journey and model state.
 
 ## Notes
 

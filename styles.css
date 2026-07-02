@@ -404,7 +404,7 @@ button.crumb:hover { color: #fff; background: rgba(255,255,255,.10); }
 .detail-body {
   min-height: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
   padding: 1rem;
 }
@@ -856,4 +856,47 @@ select { border: 1px solid #aaa; border-radius: 4px; padding: .6rem; background:
   .mlf-link i { top: 0; left: -1px; width: 2px !important; height: 0; transition: height .3s ease; }
   .mlf-link.lit i { height: 100%; width: 2px !important; }
   .mlf-link i::after { right: -3px; top: auto; bottom: -6px; transform: rotate(90deg); }
+}
+
+/* ---- Landing framing (scenario + what-you'll-see) ---- */
+.landing-points {
+  max-width: 780px;
+  margin: 1.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: .6rem;
+}
+.landing-points li {
+  position: relative;
+  padding-left: 1.35rem;
+  color: #d7d7d7;
+  font-size: clamp(.98rem, 1.3vw, 1.12rem);
+  line-height: 1.5;
+}
+.landing-points li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .52em;
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  background: #ee0000;
+}
+.landing-points b { color: #fff; }
+.landing-note {
+  max-width: 780px;
+  margin: 1.15rem 0 0 !important;
+  color: #9aa0aa !important;
+  font-size: clamp(.9rem, 1.1vw, 1rem) !important;
+}
+
+/* ---- Journey-map context line ---- */
+.graph-context {
+  margin: .3rem 0 0;
+  max-width: 860px;
+  color: #6a7280;
+  font-size: .85rem;
+  line-height: 1.45;
 }
