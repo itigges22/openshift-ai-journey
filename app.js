@@ -179,15 +179,25 @@ const story = {
     })
   ],
   edges: [
-    edge('START', 'CRIT', 'generative assistant'), edge('START', 'AUTOML', 'predictive model'),
-    edge('AUTOML', 'CRIT', 'feeds the assistant'),
+    edge('START', 'CRIT', 'generative assistant', false, 'Build the LLM assistant itself: the conversation, answers, and escalations. Start here.'),
+    edge('START', 'AUTOML', 'predictive model', false, 'Optional detour: build the fraud-risk scorer, a classic ML model the assistant will call.'),
+    edge('AUTOML', 'CRIT', 'feeds the assistant', false, 'Rejoin the main journey with the fraud tool connected.'),
     edge('CRIT', 'DATA'), edge('DATA', 'MODEL'), edge('MODEL', 'BASE'), edge('BASE', 'FORK'),
-    edge('FORK', 'RAG', 'knowledge / facts'), edge('FORK', 'BEHAVE', 'behavior / skill'), edge('FORK', 'REDTEAM', 'safety / jailbreak'),
-    edge('RAG', 'ARAG', 'automate tuning'), edge('RAG', 'AGRAG', 'agent decides'), edge('RAG', 'ALTRAG', 'structured data'), edge('RAG', 'VERIFY', 'good enough'),
-    edge('BEHAVE', 'ITS', 'need it now'), edge('BEHAVE', 'PROMPT', 'fix instructions'), edge('BEHAVE', 'TRAIN', 'adapt the model'),
+    edge('FORK', 'RAG', 'knowledge / facts', false, 'Pick when answers are wrong or uncited. The model lacks knowledge.'),
+    edge('FORK', 'BEHAVE', 'behavior / skill', false, 'Pick when the facts are right but the actions are wrong: missed escalations, poor follow-ups.'),
+    edge('FORK', 'REDTEAM', 'safety / jailbreak', false, 'Pick when the model can be jailbroken or leaks what it should not.'),
+    edge('RAG', 'ARAG', 'automate tuning', false, 'Retrieval works, but tuning it by hand is slow. Let AutoRAG search.'),
+    edge('RAG', 'AGRAG', 'agent decides', false, 'Different questions need different tools, not always retrieval.'),
+    edge('RAG', 'ALTRAG', 'structured data', false, 'The answer lives in tables and relationships, not documents.'),
+    edge('RAG', 'VERIFY', 'good enough', false, 'Grounding cleared the bar. Go measure it.'),
+    edge('BEHAVE', 'ITS', 'need it now', false, 'No time to retrain. Buy better reasoning at runtime.'),
+    edge('BEHAVE', 'PROMPT', 'fix instructions', false, 'Cheapest first move: rewrite the instructions and output format.'),
+    edge('BEHAVE', 'TRAIN', 'adapt the model', false, 'The durable fix. Needs training data and takes days.'),
     edge('REDTEAM', 'GARAK'), edge('GARAK', 'GUARD'),
     edge('ARAG', 'VERIFY'), edge('AGRAG', 'VERIFY'), edge('ALTRAG', 'VERIFY', 'pattern', true), edge('ITS', 'VERIFY'), edge('PROMPT', 'VERIFY'), edge('TRAIN', 'VERIFY'), edge('GUARD', 'VERIFY'),
-    edge('VERIFY', 'GATE'), edge('GATE', 'T2D', 'no, loop back'), edge('T2D', 'FORK', 'feedback flywheel'), edge('GATE', 'GOV', 'yes, ship')
+    edge('VERIFY', 'GATE'), edge('GATE', 'T2D', 'no, loop back', false, 'Below your bar. Turn the failures into data and go again.'),
+    edge('T2D', 'FORK', 'feedback flywheel', false, 'Take the new data back to the improvement decision.'),
+    edge('GATE', 'GOV', 'yes, ship', false, 'Thresholds met. Move to governance and release.')
   ]
 };
 
@@ -195,7 +205,7 @@ function node(id, title, subtitle, pillar, x, y, stage, demo) {
   const parts = pillar.split(' ');
   return { id, title, subtitle, pillar: parts[0], roadmap: parts.includes('roadmap'), x, y, stage, ...demo };
 }
-function edge(from, to, label = '', dashed = false) { return { from, to, label, dashed }; }
+function edge(from, to, label = '', dashed = false, hint = '') { return { from, to, label, dashed, hint }; }
 
 
 
@@ -663,7 +673,7 @@ function renderDetail() {
 
 function nextChoices(id) {
   return story.edges.filter(e => e.from === id).map(e => (
-    { label: e.label || 'Continue', detail: nodesById[e.to].subtitle || '', target: e.to }
+    { label: e.label || 'Continue', detail: e.hint || nodesById[e.to].subtitle || '', target: e.to }
   ));
 }
 function nextLabel(choice) {
